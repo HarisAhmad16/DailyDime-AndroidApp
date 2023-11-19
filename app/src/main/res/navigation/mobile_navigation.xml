@@ -22,4 +22,10 @@
         android:name="com.cmpt362team21.ui.slideshow.SlideshowFragment"
         android:label="@string/menu_slideshow"
         tools:layout="@layout/fragment_slideshow" />
+
+    <fragment
+        android:id="@+id/nav_income"
+        android:name="com.cmpt362team21.ui.income.IncomeFragment"
+        android:label="@string/menu_income"
+        tools:layout="@layout/fragment_income" />
 </navigation>
