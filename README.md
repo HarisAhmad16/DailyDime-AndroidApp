@@ -30,4 +30,3 @@ Our app boasts a sleek and luxurious design with a color scheme inspired by [thi
 *Insert details about the first Show And Tell session here.*
 
 ---
-
