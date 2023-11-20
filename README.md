@@ -31,4 +31,3 @@ Our app boasts a sleek and luxurious design with a color scheme inspired by [thi
 
 ---
 
-Feel free to customize the structure and content based on your specific details and preferences. This template provides a more organized and detailed overview of your project and can be expanded as needed.
