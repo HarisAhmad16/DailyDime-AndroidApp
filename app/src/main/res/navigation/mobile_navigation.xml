@@ -12,12 +12,6 @@
         tools:layout="@layout/fragment_home" />
 
     <fragment
-        android:id="@+id/nav_gallery"
-        android:name="com.cmpt362team21.ui.gallery.GalleryFragment"
-        android:label="@string/menu_gallery"
-        tools:layout="@layout/fragment_gallery" />
-
-    <fragment
         android:id="@+id/nav_slideshow"
         android:name="com.cmpt362team21.ui.slideshow.SlideshowFragment"
         android:label="@string/menu_slideshow"
@@ -28,4 +22,9 @@
         android:name="com.cmpt362team21.ui.income.IncomeFragment"
         android:label="@string/menu_income"
         tools:layout="@layout/fragment_income" />
+    <fragment
+        android:id="@+id/nav_expense_tracker"
+        android:name="com.cmpt362team21.ui.expenseTracker.ExpenseTrackerFragment"
+        android:label="fragment_expense_tracker"
+        tools:layout="@layout/fragment_expense_tracker" />
 </navigation>
