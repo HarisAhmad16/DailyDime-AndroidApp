@@ -14,8 +14,8 @@
             android:title="@string/menu_expense_tracker" />
         <item
             android:id="@+id/nav_slideshow"
-            android:icon="@drawable/ic_menu_slideshow"
-            android:title="@string/menu_slideshow" />
+            android:icon="@drawable/expense_icon"
+            android:title="Add New Expense" />
         <item
             android:id="@+id/nav_income"
             android:icon="@drawable/ic_menu_income"
