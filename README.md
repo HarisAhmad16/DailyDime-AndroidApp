@@ -1,5 +1,8 @@
 # DailyDime362Proj
 
+## Show and Tell 1 Video Link:
+https://www.loom.com/share/dc3c53c24ec8472b90614fd342a5fb4e?sid=258bb94f-7f8f-4ce8-b787-26064c063a93
+
 ## Team Members
 - Haris Ahmad
 - Ajaipaul Cheema
