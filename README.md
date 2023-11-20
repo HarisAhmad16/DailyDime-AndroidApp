@@ -1,4 +1,4 @@
-# DailyDime362Proj
+### DailyDime362Proj
 
 Haris Ahmad
 Ajaipaul Cheema
