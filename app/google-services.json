@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "137541834006",
+    "project_id": "dailydime-c0dbb",
+    "storage_bucket": "dailydime-c0dbb.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:137541834006:android:65ea08476931da2f1e2c37",
+        "android_client_info": {
+          "package_name": "com.cmpt362team21"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDbB8513RV_CKvCphJPKRdyVle155qEzqk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

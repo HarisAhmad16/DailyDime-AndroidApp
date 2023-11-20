@@ -11,4 +11,13 @@
     <string name="menu_gallery">Gallery</string>
     <string name="menu_slideshow">Slideshow</string>
     <string name="menu_income">Income</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="sign_in">Sign In</string>
+    <string name="type_your_password">Type Your Password</string>
+    <string name="type_your_email">Type your Email</string>
+    <string name="daily_dime">Daily Dime</string>
+    <string name="type_your_date_of_birth">Type your Date Of Birth</string>
+    <string name="type_your_last_name">Type your last name</string>
+    <string name="type_your_first_name">Type your first name</string>
+    <string name="retype_your_password">Retype Your Password</string>
 </resources>
