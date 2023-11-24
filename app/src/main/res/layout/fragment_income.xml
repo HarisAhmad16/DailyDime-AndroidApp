@@ -32,7 +32,6 @@
             android:layout_marginStart="152dp"
             android:layout_marginTop="20dp"
             android:text="$10,500"
-
             android:textAlignment="center"
             android:textColor="#FFFFFF"
             android:textSize="18sp"
@@ -86,24 +85,40 @@
             android:text="No income items yet."
             android:gravity="center"
             android:visibility="gone" />
-        <TextView
-            android:id="@+id/allIncomes"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="All Incomes"
-            android:gravity="left"
-            android:textColor="#000000" />
 
-        <!-- ListView for displaying items with icons and text views -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/allIncomes"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Incomes"
+                android:gravity="left"
+                android:textColor="#000000" />
+
+            <Spinner
+                android:id="@+id/monthSpinner"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:entries="@array/months_array"
+                android:prompt="@string/month_prompt" />
+
+        </RelativeLayout>
+
+
         <ListView
             android:id="@+id/listViewIncomes"
             android:layout_width="match_parent"
-            android:layout_height="400dp"
+            android:layout_height="360dp"
+            android:clickable="false"
             android:clipToPadding="false"
             android:divider="@android:color/darker_gray"
             android:dividerHeight="0.5dp"
-            android:clickable="false"
-            android:focusable="false"/>
+            android:focusable="false" />
 
         <TextView
             android:id="@+id/totalIncome"

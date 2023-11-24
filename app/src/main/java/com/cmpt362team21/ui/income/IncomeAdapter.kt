@@ -32,8 +32,9 @@ class IncomeAdapter(context: Context, private val incomes: List<IncomeItem>) : B
         val incomeTypeTextView: TextView = view.findViewById(R.id.incomeTypeTextView)
         val incomeAmountTextView: TextView = view.findViewById(R.id.incomeAmountTextView)
 
-        incomeTypeTextView.text = item.incomeType
-        incomeAmountTextView.text = item.incomeAmount
+        // Use the correct property names from your IncomeItem class
+        incomeTypeTextView.text = item.type
+        incomeAmountTextView.text = item.amount
 
         return view
     }
