@@ -1,5 +1,8 @@
 # DailyDime362Proj
 
+## Show and Tell 2 Video Link:
+https://www.loom.com/share/bd8ade041b7248c1bdb39da5ec943ee8?sid=93014a8d-be36-4dfa-a2f2-5cc62143b440
+
 ## Show and Tell 1 Video Link:
 https://www.loom.com/share/dc3c53c24ec8472b90614fd342a5fb4e?sid=af1dd335-0b26-4502-b476-a65b0899bfc5
 
