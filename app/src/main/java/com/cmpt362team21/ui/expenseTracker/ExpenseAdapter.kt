@@ -13,7 +13,7 @@ import android.widget.TextView
 import android.widget.Toast
 import com.cmpt362team21.R
 
-class ExpenseAdapter(context: Context, private val expenseList: ArrayList<expenseItem>) : BaseAdapter(){
+class ExpenseAdapter(context: Context, private val expenseList: ArrayList<ExpenseItem>) : BaseAdapter(){
 
     private val inflater: LayoutInflater = LayoutInflater.from(context)
     override fun getCount(): Int {
