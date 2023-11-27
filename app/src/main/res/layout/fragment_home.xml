@@ -38,23 +38,21 @@
         </androidx.cardview.widget.CardView>
 
         <TextView
-            android:id="@+id/firstName"
+            android:id="@+id/firstUserName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_toEndOf="@id/profilePicture"
-            android:text="Haris"
             android:textColor="#ffffff"
             android:textSize="18sp" />
 
         <TextView
-            android:id="@+id/lastName"
+            android:id="@+id/lastUserName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_marginStart="3dp"
-            android:layout_toEndOf="@id/firstName"
-            android:text="Ahmad"
+            android:layout_toEndOf="@id/firstUserName"
             android:textColor="#ffffff"
             android:textSize="18sp" />
     </RelativeLayout>
