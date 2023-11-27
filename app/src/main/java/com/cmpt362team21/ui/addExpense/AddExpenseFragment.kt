@@ -23,34 +23,6 @@ import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-//class AddExpenseFragment : Fragment() {
-//
-//    private var _binding: FragmentAddExpenseBinding? = null
-//
-//    // This property is only valid between onCreateView and
-//    // onDestroyView.
-//    private val binding get() = _binding!!
-//
-//    override fun onCreateView(
-//        inflater: LayoutInflater,
-//        container: ViewGroup?,
-//        savedInstanceState: Bundle?
-//    ): View {
-//        val addExpenseViewModel =
-//            ViewModelProvider(this).get(AddExpenseViewModel::class.java)
-//
-//        _binding = FragmentAddExpenseBinding.inflate(inflater, container, false)
-//        val root: View = binding.root
-//
-//        return root
-//    }
-//
-//    override fun onDestroyView() {
-//        super.onDestroyView()
-//        _binding = null
-//    }
-//}
-
 data class ExpenseItem(val type: String, val amount: String, val date: String)
 
 class AddExpenseFragment : Fragment() {
@@ -59,7 +31,7 @@ class AddExpenseFragment : Fragment() {
 
     private lateinit var expenseViewModel: AddExpenseViewModel
     private var _binding: FragmentAddExpenseBinding? = null
-    private val binding get() = _binding!!
+    private val binding get() = _binding ?: throw IllegalStateException("Fragment binding is null")
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -134,12 +106,13 @@ class AddExpenseFragment : Fragment() {
         return root
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
-    }
-
     private fun setupDatabaseListener(selectedMonth: String) {
+        val currentBinding = binding
+        if (currentBinding == null) {
+            Log.e("AddExpenseFragment", "Binding is null in setupDatabaseListener")
+            return
+        }
+
         val db = FirebaseFirestore.getInstance()
         val expenseCollection = db.collection("expenses")
 
@@ -184,15 +157,21 @@ class AddExpenseFragment : Fragment() {
                 adapterExpense.notifyDataSetChanged()
 
                 // Update the totalExpense TextView
-                binding.totalExpense.text = String.format("Total Expense: $%.2f", totalExpense)
-                binding.currentBalance.text = String.format("$%.2f", currentBalance)
+                currentBinding.totalExpense.text = String.format("Total Expense: $%.2f", totalExpense)
+                currentBinding.currentBalance.text = String.format("$%.2f", currentBalance)
             }
         }
     }
+
 
     private fun convertToFullMonth(abbreviation: String): String {
         val format = SimpleDateFormat("MMM", Locale.US)
         val date = format.parse(abbreviation)
         return SimpleDateFormat("MMMM", Locale.US).format(date)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }
