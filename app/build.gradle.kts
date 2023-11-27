@@ -40,7 +40,8 @@ android {
 }
 
 dependencies {
-
+    implementation("com.google.code.gson:gson:2.8.9")
+    implementation("com.github.AnyChart:AnyChart-Android:1.1.5")
     implementation("androidx.core:core-ktx:1.9.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.10.0")
