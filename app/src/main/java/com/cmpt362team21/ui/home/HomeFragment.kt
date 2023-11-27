@@ -13,17 +13,16 @@ class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
 
+    private val homeViewModel: HomeViewModel = HomeViewModel.getInstance()
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val homeViewModel = ViewModelProvider(this)[HomeViewModel::class.java]
-
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
 
         homeViewModel.firstName.observe(viewLifecycleOwner) { firstName ->
-            Log.d("HomeFragment", "First Name Observer: $firstName")
             binding.firstUserName.text = firstName
         }
 

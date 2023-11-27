@@ -15,7 +15,6 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 
-
 class SignInActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivitySignInBinding
@@ -44,7 +43,7 @@ class SignInActivity : AppCompatActivity() {
                                 val firstName = snapshot.child("firstName").value?.toString() ?: ""
                                 val lastName = snapshot.child("lastName").value?.toString() ?: ""
 
-                                val homeViewModel = ViewModelProvider(this@SignInActivity)[HomeViewModel::class.java]
+                                val homeViewModel = HomeViewModel.getInstance()
                                 homeViewModel.setUserNames(firstName, lastName)
 
                                 val intent = Intent(this@SignInActivity, MainActivity::class.java)
@@ -52,7 +51,7 @@ class SignInActivity : AppCompatActivity() {
                             }
 
                             override fun onCancelled(error: DatabaseError) {
-                                // Handle the error
+                                // TODO: implement a message indicating log in user data didn't change (populate the home)
                             }
                         })
                     } else {
