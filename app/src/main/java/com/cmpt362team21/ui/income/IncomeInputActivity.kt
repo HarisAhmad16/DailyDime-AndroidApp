@@ -12,6 +12,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.cmpt362team21.R
 import com.cmpt362team21.databinding.FragmentIncomeInputDialogBinding
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -59,20 +60,20 @@ class IncomeInputActivity : AppCompatActivity() {
     }
 
     private fun saveIncomeDataToFirestore() {
-        if (selectedDate != null) {
+        val currentUser = FirebaseAuth.getInstance().currentUser
+
+        if (currentUser != null && selectedDate != null) {
             // Format the date as needed (e.g., converting to a string)
             val dateFormat = SimpleDateFormat("yyyy MMM dd", Locale.getDefault())
             val formattedDate = dateFormat.format(selectedDate!!.time)
 
-            // Create a new income object
+            // Create a new income object with user UID
             val income = hashMapOf(
                 "type" to enteredIncomeType,
                 "amount" to enteredIncomeAmount,
-                "date" to formattedDate
+                "date" to formattedDate,
+                "userId" to currentUser.uid
             )
-            //Log.d("Firestore", "Type data saved successfully: $enteredIncomeType")
-            //Log.d("Firestore", "amount data saved successfully: $enteredIncomeAmount")
-            //Log.d("Firestore", "date data saved successfully: $formattedDate")
 
             // Add a new document with a generated ID
             firestore.collection("incomes")
@@ -86,11 +87,12 @@ class IncomeInputActivity : AppCompatActivity() {
                     Toast.makeText(this, "Failed to save income data", Toast.LENGTH_SHORT).show()
                 }
         } else {
-            // Handle the case when selectedDate is null (optional)
-            Log.d("Firestore", "Please select a date")
-            Toast.makeText(this, "Please select a date", Toast.LENGTH_SHORT).show()
+            // Handle the case when selectedDate is null or user is not logged in (optional)
+            Log.d("Firestore", "Please select a date or log in")
+            Toast.makeText(this, "Please select a date or log in", Toast.LENGTH_SHORT).show()
         }
     }
+
 
 
     private fun setupDialogListeners() {
