@@ -8,19 +8,15 @@ import android.view.ViewGroup
 import android.widget.CalendarView
 import android.widget.ListView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.cmpt362team21.R
 import com.cmpt362team21.databinding.FragmentExpenseTrackerBinding
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
 import com.google.firebase.firestore.FirebaseFirestore
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 
 data class ExpenseItem(val type: String, val amount: String, val date: String)
@@ -32,11 +28,8 @@ class ExpenseTrackerFragment : Fragment() {
     // onDestroyView.
     private val binding get() = _binding!!
     private lateinit var expenseList : ArrayList<ExpenseItem>
-    //private lateinit var db:DatabaseReference
     private lateinit var expensesListView:ListView
-
-
-
+    private lateinit var noExpensesTextView:TextView
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -55,19 +48,15 @@ class ExpenseTrackerFragment : Fragment() {
             textView.text = it
         }
 
-        //val expense1 = expenseItem("Insurance","25","2023 Nov 21")
-        //val expense2 = expenseItem("School","250","2023 Nov 23")
-
-
-
-        //expenseList.add(expense1)
-        //expenseList.add(expense2)
-
-
-        //Log.d("db content", expenseList.toString())
         val calenderView = root.findViewById<CalendarView>(R.id.calendarView)
         calenderView.setOnDateChangeListener{ view, year, month, dayOfMonth ->
             val selectedDate = "$year-${month + 1}-$dayOfMonth"
+            val displayDate = "${month + 1} $dayOfMonth, $year"
+            val inputFormat = SimpleDateFormat("MM dd, yyyy", Locale.getDefault())
+            val outputFormat = SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault())
+
+            val date = inputFormat.parse(displayDate)
+            val formattedDate = outputFormat.format(date!!)
 
             val builder = AlertDialog.Builder(requireContext())
 
@@ -75,15 +64,13 @@ class ExpenseTrackerFragment : Fragment() {
             val dialogView = inflater.inflate(R.layout.expense_pop_up, null)
 
 
-            builder.setTitle("Expenses for $selectedDate")
+            builder.setTitle("Expenses for $formattedDate")
             builder.setView(dialogView)
 
             expensesListView = dialogView.findViewById(R.id.expensesListView)
+            noExpensesTextView = dialogView.findViewById(R.id.noExpensesTextView)
 
-            getExpensesFromDB()
-
-            //val expensesText = "Expenses will be populated with database information"
-            //expensesTextView.text = expensesText
+            getExpensesFromDB(formatDate(selectedDate))
 
             builder.setPositiveButton("Close") { dialog, which ->
                 dialog.dismiss()
@@ -96,30 +83,44 @@ class ExpenseTrackerFragment : Fragment() {
         return root
     }
 
-    private fun getExpensesFromDB() {
+    private fun getExpensesFromDB(selectedDate: String) {
         val db = FirebaseFirestore.getInstance()
         val expenseCollection = db.collection("expenses")
 
-        expenseCollection.addSnapshotListener{snapshot, exception ->
-            if (exception != null) {
-                Log.e("Firestore", "Listen failed.", exception)
-                return@addSnapshotListener
-            }
-            if(snapshot != null){
-                expenseList = arrayListOf()
-
-                for(expense in snapshot.documents){
-                    val type = expense.getString("type") ?: ""
-                    val amount = expense.getDouble("amount") ?: 0.0
-                    val relatedDate = expense.getString("date") ?: ""
-                    val userExpense = ExpenseItem(type,amount.toString(),relatedDate)
-                    expenseList.add(userExpense)
+        expenseCollection.whereEqualTo("date", selectedDate)
+            .addSnapshotListener { snapshot, exception ->
+                if (exception != null) {
+                    Log.e("FireStore", "Listen failed.", exception)
+                    return@addSnapshotListener
                 }
-                val adapter = ExpenseAdapter(requireContext(), expenseList)
-                expensesListView.adapter = adapter
-                adapter.notifyDataSetChanged()
+
+                if (snapshot != null) {
+                    expenseList = arrayListOf()
+
+                    for (expense in snapshot.documents) {
+                        val type = expense.getString("type") ?: ""
+                        val amount = expense.getDouble("amount") ?: 0.0
+                        val relatedDate = expense.getString("date") ?: ""
+                        val userExpense = ExpenseItem(type, amount.toString(), relatedDate)
+                        expenseList.add(userExpense)
+                    }
+
+
+                    noExpensesTextView.visibility = if (expenseList.isEmpty()) View.VISIBLE else View.GONE
+
+                    val adapter = ExpenseAdapter(requireContext(), expenseList)
+                    expensesListView.adapter = adapter
+                    adapter.notifyDataSetChanged()
+                }
             }
-        }
+    }
+
+    private fun formatDate(inputDate: String): String {
+        val inputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        val outputFormat = SimpleDateFormat("yyyy MMM dd", Locale.getDefault())
+
+        val date = inputFormat.parse(inputDate)
+        return outputFormat.format(date!!)
     }
 
     override fun onDestroyView() {
