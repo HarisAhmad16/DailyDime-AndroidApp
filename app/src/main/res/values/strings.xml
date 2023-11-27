@@ -19,6 +19,7 @@
     <string name="type_your_first_name">Type your first name</string>
     <string name="retype_your_password">Retype Your Password</string>
     <string name="menu_expense_tracker">Expense Tracker</string>
+    <string name="update_profile">Update Profile</string>
     <string-array name="months_array">
         <item>January</item>
         <item>February</item>

@@ -22,9 +22,16 @@
         android:name="com.cmpt362team21.ui.income.IncomeFragment"
         android:label="@string/menu_income"
         tools:layout="@layout/fragment_income" />
+
     <fragment
         android:id="@+id/nav_expense_tracker"
         android:name="com.cmpt362team21.ui.expenseTracker.ExpenseTrackerFragment"
         android:label="fragment_expense_tracker"
         tools:layout="@layout/fragment_expense_tracker" />
+
+    <fragment
+        android:id="@+id/nav_profile"
+        android:name="com.cmpt362team21.ui.profile.ProfileFragment"
+        android:label="fragment_profile"
+        tools:layout="@layout/fragment_profile" />
 </navigation>
