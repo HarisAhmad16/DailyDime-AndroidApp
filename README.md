@@ -31,8 +31,6 @@ Managing personal finances can be a daunting task for many individuals. The **Da
 
 Our app boasts a sleek and luxurious design with a color scheme inspired by [this Dribbble shot](https://dribbble.com/shots/14304518-Finance-App-Dark-Theme). The combination of black, grey, and white elements creates a cool and sophisticated user interface.
 
-## Show And Tell 1
 
-*Insert details about the first Show And Tell session here.*
 
 ---
