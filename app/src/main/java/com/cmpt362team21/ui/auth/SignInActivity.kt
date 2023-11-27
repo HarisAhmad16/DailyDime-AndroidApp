@@ -51,7 +51,7 @@ class SignInActivity : AppCompatActivity() {
                             }
 
                             override fun onCancelled(error: DatabaseError) {
-                                // Handle the error
+                                // TODO: implement a message indicating log in user data didn't change (populate the home)
                             }
                         })
                     } else {
