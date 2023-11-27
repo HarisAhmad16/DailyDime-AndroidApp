@@ -6,8 +6,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.CalendarView
+import android.widget.EditText
 import android.widget.ListView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
@@ -17,9 +19,7 @@ import com.cmpt362team21.databinding.FragmentExpenseTrackerBinding
 import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.Locale
-
-
-data class ExpenseItem(val type: String, val amount: String, val date: String)
+data class ExpenseItem(val expenseId:String, val userId:String,val type: String, val amount: String, val date: String)
 class ExpenseTrackerFragment : Fragment() {
 
     private var _binding: FragmentExpenseTrackerBinding? = null
@@ -49,7 +49,7 @@ class ExpenseTrackerFragment : Fragment() {
         }
 
         val calenderView = root.findViewById<CalendarView>(R.id.calendarView)
-        calenderView.setOnDateChangeListener{ view, year, month, dayOfMonth ->
+        calenderView.setOnDateChangeListener{ _, year, month, dayOfMonth ->
             val selectedDate = "$year-${month + 1}-$dayOfMonth"
             val displayDate = "${month + 1} $dayOfMonth, $year"
             val inputFormat = SimpleDateFormat("MM dd, yyyy", Locale.getDefault())
@@ -63,7 +63,6 @@ class ExpenseTrackerFragment : Fragment() {
             val inflater = layoutInflater
             val dialogView = inflater.inflate(R.layout.expense_pop_up, null)
 
-
             builder.setTitle("Expenses for $formattedDate")
             builder.setView(dialogView)
 
@@ -72,7 +71,7 @@ class ExpenseTrackerFragment : Fragment() {
 
             getExpensesFromDB(formatDate(selectedDate))
 
-            builder.setPositiveButton("Close") { dialog, which ->
+            builder.setPositiveButton("Close") { dialog, _ ->
                 dialog.dismiss()
             }
 
@@ -99,19 +98,87 @@ class ExpenseTrackerFragment : Fragment() {
 
                     for (expense in snapshot.documents) {
                         val type = expense.getString("type") ?: ""
-                        val amount = expense.getDouble("amount") ?: 0.0
+
+                        val amount = when (val amountField = expense.get("amount")) {
+                            is Number -> amountField.toDouble()
+                            is String -> amountField.toDoubleOrNull() ?: 0.0
+                            else -> 0.0
+                        }
                         val relatedDate = expense.getString("date") ?: ""
-                        val userExpense = ExpenseItem(type, amount.toString(), relatedDate)
+                        val userId = expense.getString("userId") ?: ""
+                        val expenseId = expense.id
+                        val userExpense = ExpenseItem(expenseId,userId,type, amount.toString(), relatedDate)
                         expenseList.add(userExpense)
                     }
 
-
                     noExpensesTextView.visibility = if (expenseList.isEmpty()) View.VISIBLE else View.GONE
 
-                    val adapter = ExpenseAdapter(requireContext(), expenseList)
+                    val adapter = ExpenseAdapter(requireContext(), expenseList, {expenseId -> deleteExpenseFromDB(expenseId)}, {expenseItem -> showEditDialog(expenseItem)})
                     expensesListView.adapter = adapter
                     adapter.notifyDataSetChanged()
                 }
+            }
+    }
+
+    private fun deleteExpenseFromDB(expensesId: String) {
+        val db = FirebaseFirestore.getInstance()
+        val expenseCollection = db.collection("expenses")
+
+        expenseCollection.document(expensesId)
+            .delete()
+            .addOnSuccessListener {
+                Toast.makeText(requireContext(),"Expense Successfully paid",Toast.LENGTH_SHORT).show()
+            }
+            .addOnFailureListener { e ->
+                Log.e("Delete Failure", "Error deleting expense", e)
+            }
+    }
+
+    private fun showEditDialog(expenseItem: ExpenseItem) {
+        val builder = android.app.AlertDialog.Builder(context)
+        val inflater = LayoutInflater.from(context)
+        val dialogView = inflater.inflate(R.layout.expense_edit_pop_up, null)
+
+        val editedTypeEditText = dialogView.findViewById<EditText>(R.id.editedTypeEditText)
+        val editedAmountEditText = dialogView.findViewById<EditText>(R.id.editedAmountEditText)
+
+        editedTypeEditText.setText(expenseItem.type)
+        editedAmountEditText.setText(expenseItem.amount)
+
+        builder.setView(dialogView)
+            .setTitle("Edit Expense")
+            .setPositiveButton("Save") { dialog, _ ->
+                val editedType = editedTypeEditText.text.toString()
+                val editedAmount = editedAmountEditText.text.toString()
+
+                updateFireStoreDocument(expenseItem.expenseId, editedType, editedAmount)
+                dialog.dismiss()
+            }
+            .setNegativeButton("Cancel") { dialog, _ ->
+                dialog.dismiss()
+            }
+
+        val alertDialog = builder.create()
+        alertDialog.show()
+    }
+
+    private fun updateFireStoreDocument(expenseId: String, editedType: String, editedAmount: String) {
+        val db = FirebaseFirestore.getInstance()
+        val expenseCollection = db.collection("expenses")
+
+        val expenseDocument = expenseCollection.document(expenseId)
+
+        val amountValue = editedAmount.toDoubleOrNull() ?: 0.0
+
+        expenseDocument.update(mapOf(
+            "type" to editedType,
+            "amount" to amountValue
+        ))
+            .addOnSuccessListener {
+                Toast.makeText(requireContext(),"Expense successfully updated",Toast.LENGTH_SHORT).show()
+            }
+            .addOnFailureListener { e ->
+                Log.e("Edit Failure", "Error updating expense", e)
             }
     }
 
@@ -122,7 +189,6 @@ class ExpenseTrackerFragment : Fragment() {
         val date = inputFormat.parse(inputDate)
         return outputFormat.format(date!!)
     }
-
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

@@ -1,6 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- res/layout/dialog_expense_input.xml -->
-
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
@@ -8,7 +6,6 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-    <!-- Date Selection -->
     <LinearLayout
         android:id="@+id/layoutSelectDate"
         android:layout_width="match_parent"
@@ -25,13 +22,6 @@
             android:textColor="#000"
             android:textSize="20sp" />
 
-        <!-- You can add a DatePicker widget here -->
-        <!-- For example:
-             <DatePicker
-                android:id="@+id/datePicker"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-        -->
     </LinearLayout>
 
     <View
@@ -39,7 +29,6 @@
         android:layout_height="2dp"
         android:background="#D6D6D6" />
 
-    <!-- Expense Type -->
     <LinearLayout
         android:id="@+id/layoutExpenseType"
         android:layout_width="match_parent"
@@ -57,14 +46,6 @@
             android:textColor="#000"
             android:textSize="20sp" />
 
-        <!-- You can add an EditText widget for expense type here -->
-        <!-- For example:
-             <EditText
-                android:id="@+id/etExpenseType"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="text" />
-        -->
     </LinearLayout>
 
     <View
@@ -72,7 +53,6 @@
         android:layout_height="2dp"
         android:background="#D6D6D6" />
 
-    <!-- Expense Amount -->
     <LinearLayout
         android:id="@+id/layoutExpenseAmount"
         android:layout_width="match_parent"
@@ -90,17 +70,9 @@
             android:textColor="#000"
             android:textSize="20sp" />
 
-        <!-- You can add an EditText widget for expense amount here -->
-        <!-- For example:
-             <EditText
-                android:id="@+id/etExpenseAmount"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="numberDecimal" />
-        -->
     </LinearLayout>
 
-    <!-- Save and Cancel buttons -->
+
     <View
         android:layout_width="match_parent"
         android:layout_height="2dp"
