@@ -18,6 +18,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.cmpt362team21.R
 import com.cmpt362team21.databinding.FragmentIncomeBinding
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -101,50 +102,54 @@ class IncomeFragment : Fragment() {
 
     private fun setupDatabaseListener(selectedMonth: String ) {
         val db = FirebaseFirestore.getInstance()
+        val currentUser = FirebaseAuth.getInstance().currentUser
         val incomeCollection = db.collection("incomes")
 
-        incomeCollection.addSnapshotListener { snapshot, exception ->
-            if (exception != null) {
-                Log.e("Firestore", "Listen failed.", exception)
-                return@addSnapshotListener
-            }
-
-            if (snapshot != null) {
-                val newIncomeItems = mutableListOf<IncomeItem>()
-                var totalIncome = 0.0
-                var currentBalance = 0.0
-
-                for (document in snapshot.documents) {
-                    val type = document.getString("type") ?: ""
-                    val amount = document.getDouble("amount") ?: 0.0
-                    currentBalance += amount
-                    val date = document.getString("date") ?: ""
-                    val documentMonth = date.split(" ")[1]
-                    val documentMonthFull = convertToFullMonth(documentMonth)
-                    Log.d("Firestore", "Document Month: $documentMonthFull, Selected Month: $selectedMonth")
-                    // Check if the document's month matches the selected month
-                    if (selectedMonth == "All Months" || selectedMonth == documentMonthFull) {
-                        val incomeItem = IncomeItem(type, "+$amount", date)
-                        newIncomeItems.add(incomeItem)
-
-                        // Update totalIncome with the current amount
-                        totalIncome += amount
+        if (currentUser != null) {
+            incomeCollection.whereEqualTo("userId", currentUser.uid)
+                .addSnapshotListener { snapshot, exception ->
+                    if (exception != null) {
+                        Log.e("Firestore", "Listen failed.", exception)
+                        return@addSnapshotListener
                     }
 
+                    if (snapshot != null) {
+                        val newIncomeItems = mutableListOf<IncomeItem>()
+                        var totalIncome = 0.0
+                        var currentBalance = 0.0
+
+                        for (document in snapshot.documents) {
+                            val type = document.getString("type") ?: ""
+                            val amount = document.getDouble("amount") ?: 0.0
+                            currentBalance += amount
+                            val date = document.getString("date") ?: ""
+                            val documentMonth = date.split(" ")[1]
+                            val documentMonthFull = convertToFullMonth(documentMonth)
+                            Log.d("Firestore", "Document Month: $documentMonthFull, Selected Month: $selectedMonth")
+                            // Check if the document's month matches the selected month
+                            if (selectedMonth == "All Months" || selectedMonth == documentMonthFull) {
+                                val incomeItem = IncomeItem(type, "+$amount", date)
+                                newIncomeItems.add(incomeItem)
+
+                                // Update totalIncome with the current amount
+                                totalIncome += amount
+                            }
+
+                        }
+
+                        // Update the incomeItems list with the new data
+                        incomeItems.clear()
+                        incomeItems.addAll(newIncomeItems)
+
+                        // Notify the adapter that the data has changed
+                        adapterIncome.notifyDataSetChanged()
+
+                        // Update the totalIncome TextView
+                        binding.totalIncome.text = String.format("Total Income: $%.2f", totalIncome)
+                        binding.currentBalance.text = String.format("$%.2f", currentBalance)
+
+                    }
                 }
-
-                // Update the incomeItems list with the new data
-                incomeItems.clear()
-                incomeItems.addAll(newIncomeItems)
-
-                // Notify the adapter that the data has changed
-                adapterIncome.notifyDataSetChanged()
-
-                // Update the totalIncome TextView
-                binding.totalIncome.text = String.format("Total Income: $%.2f", totalIncome)
-                binding.currentBalance.text = String.format("$%.2f", currentBalance)
-
-            }
         }
     }
 
@@ -153,6 +158,4 @@ class IncomeFragment : Fragment() {
         val date = format.parse(abbreviation)
         return SimpleDateFormat("MMMM", Locale.US).format(date)
     }
-
-
 }

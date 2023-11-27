@@ -3,6 +3,7 @@ package com.cmpt362team21.ui.income
 import android.app.DatePickerDialog
 import android.os.Bundle
 import android.text.InputType
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
@@ -11,10 +12,16 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.cmpt362team21.R
 import com.cmpt362team21.databinding.FragmentIncomeInputDialogBinding
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Locale
 
 class IncomeInputActivity : AppCompatActivity() {
-
+    private lateinit var firestore: FirebaseFirestore
+    private var enteredIncomeAmount: Double = 0.0
+    private var enteredIncomeType: String = ""
     private var selectedDate: Calendar? = null
     private var _binding: FragmentIncomeInputDialogBinding? = null
     private val binding get() = _binding!!
@@ -24,9 +31,9 @@ class IncomeInputActivity : AppCompatActivity() {
         _binding = FragmentIncomeInputDialogBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Set up UI components and bindings
-        val editTextIncomeType: LinearLayout = binding.layoutIncomeType
-        val editTextIncomeAmount: LinearLayout = binding.layoutIncomeAmount
+
+        firestore = FirebaseFirestore.getInstance()
+
 
         // Set up click listener for date selection
         binding.layoutSelectDate.setOnClickListener {
@@ -35,6 +42,7 @@ class IncomeInputActivity : AppCompatActivity() {
 
         val btnSave: Button = binding.btnSaveIncome
         btnSave.setOnClickListener {
+            saveIncomeDataToFirestore()
             finish()
         }
 
@@ -50,6 +58,42 @@ class IncomeInputActivity : AppCompatActivity() {
 
         setupDialogListeners()
     }
+
+    private fun saveIncomeDataToFirestore() {
+        val currentUser = FirebaseAuth.getInstance().currentUser
+
+        if (currentUser != null && selectedDate != null) {
+            // Format the date as needed (e.g., converting to a string)
+            val dateFormat = SimpleDateFormat("yyyy MMM dd", Locale.getDefault())
+            val formattedDate = dateFormat.format(selectedDate!!.time)
+
+            // Create a new income object with user UID
+            val income = hashMapOf(
+                "type" to enteredIncomeType,
+                "amount" to enteredIncomeAmount,
+                "date" to formattedDate,
+                "userId" to currentUser.uid
+            )
+
+            // Add a new document with a generated ID
+            firestore.collection("incomes")
+                .add(income)
+                .addOnSuccessListener {
+                    Log.d("Firestore", "Income data saved successfully")
+                    Toast.makeText(this, "Income data saved successfully", Toast.LENGTH_SHORT).show()
+                }
+                .addOnFailureListener { e ->
+                    Log.e("Firestore", "Failed to save income data", e)
+                    Toast.makeText(this, "Failed to save income data", Toast.LENGTH_SHORT).show()
+                }
+        } else {
+            // Handle the case when selectedDate is null or user is not logged in (optional)
+            Log.d("Firestore", "Please select a date or log in")
+            Toast.makeText(this, "Please select a date or log in", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+
 
     private fun setupDialogListeners() {
         setLayoutClickListener(R.id.layoutSelectDate, "Date")
@@ -79,16 +123,20 @@ class IncomeInputActivity : AppCompatActivity() {
         alertDialog.setTitle("Income Amount")
         val input = EditText(this)
         input.hint = "Enter Income Amount"
-        input.inputType = InputType.TYPE_CLASS_NUMBER
+
+        // Allow both integers and decimals
+        input.inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
+        input.setText(enteredIncomeAmount.toString())
+        
         alertDialog.setView(input)
         alertDialog.setPositiveButton("OK") { _, _ ->
             val inputText = input.text.toString()
-            val amount = if (inputText.isNotBlank()) inputText.toDouble() else 0.0
-            // Handle the entered income amount
+            enteredIncomeAmount = if (inputText.isNotBlank()) inputText.toDouble() else 0.0
         }
         alertDialog.setNegativeButton("Cancel") { dialog, _ -> dialog.cancel() }
         alertDialog.show()
     }
+
 
     private fun showIncomeTypeDialog() {
         val alertDialog = AlertDialog.Builder(this)
@@ -97,12 +145,13 @@ class IncomeInputActivity : AppCompatActivity() {
         val input = EditText(this)
         input.hint = "Enter Income Type"
         input.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_CAP_WORDS
-
+        input.setText(enteredIncomeType)
+        
         alertDialog.setView(input)
-
         alertDialog.setPositiveButton("OK") { _, _ ->
-            val incomeType = input.text.toString()
-            // Handle the entered income type
+            // Capture the entered income type
+            enteredIncomeType = input.text.toString()
+            // Handle the entered income type (if needed)
         }
 
         alertDialog.setNegativeButton("Cancel") { dialog, _ -> dialog.cancel() }

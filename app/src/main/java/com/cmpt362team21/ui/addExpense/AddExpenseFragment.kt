@@ -117,8 +117,7 @@ class AddExpenseFragment : Fragment() {
         setupDatabaseListener("January")
         adapterExpense = ExpenseAdapter(requireContext(), expenseItems)
         // Set up the ListView with the custom adapter
-        val listViewExpenses: ListView = binding.listViewExpense // Updated ID to match XML
-        adapterExpense = ExpenseAdapter(requireContext(), expenseItems)
+        val listViewExpenses: ListView = binding.listViewExpense
         listViewExpenses.adapter = adapterExpense
 
         listViewExpenses.emptyView = binding.emptyView
@@ -142,7 +141,7 @@ class AddExpenseFragment : Fragment() {
 
     private fun setupDatabaseListener(selectedMonth: String) {
         val db = FirebaseFirestore.getInstance()
-        val expenseCollection = db.collection("NewExpenses")
+        val expenseCollection = db.collection("expenses")
 
         expenseCollection.addSnapshotListener { snapshot, exception ->
             if (exception != null) {
@@ -158,7 +157,7 @@ class AddExpenseFragment : Fragment() {
                 for (document in snapshot.documents) {
                     val type = document.getString("type") ?: ""
                     val amount = document.getDouble("amount") ?: 0.0
-                    currentBalance -= amount // Subtracting expense from balance
+                    currentBalance += amount
                     val date = document.getString("date") ?: ""
                     val documentMonth = date.split(" ")[1]
                     val documentMonthFull = convertToFullMonth(documentMonth)
