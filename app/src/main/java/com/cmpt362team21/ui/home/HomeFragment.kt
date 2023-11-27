@@ -1,12 +1,12 @@
 package com.cmpt362team21.ui.home
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
+import com.cmpt362team21.R
 import com.cmpt362team21.databinding.FragmentHomeBinding
 
 class HomeFragment : Fragment() {
@@ -28,6 +28,10 @@ class HomeFragment : Fragment() {
 
         homeViewModel.lastName.observe(viewLifecycleOwner) { lastName ->
             binding.lastUserName.text = lastName
+        }
+
+        binding.profileSection.setOnClickListener {
+            findNavController().navigate(R.id.nav_profile)
         }
 
         return binding.root

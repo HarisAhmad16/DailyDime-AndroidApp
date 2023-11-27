@@ -44,7 +44,7 @@ class SignInActivity : AppCompatActivity() {
                                 val lastName = snapshot.child("lastName").value?.toString() ?: ""
 
                                 val homeViewModel = HomeViewModel.getInstance()
-                                homeViewModel.setUserNames(firstName, lastName)
+                                homeViewModel.setUserNames(firstName, lastName, email)
 
                                 val intent = Intent(this@SignInActivity, MainActivity::class.java)
                                 startActivity(intent)

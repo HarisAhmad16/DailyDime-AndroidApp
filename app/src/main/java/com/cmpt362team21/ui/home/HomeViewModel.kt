@@ -12,6 +12,9 @@ class HomeViewModel : ViewModel() {
     private val _lastName = MutableLiveData<String>()
     val lastName: LiveData<String> = _lastName
 
+    private val _email = MutableLiveData<String>()
+    val email: LiveData<String> = _email
+
     companion object {
         private val instance = HomeViewModel()
 
@@ -20,9 +23,10 @@ class HomeViewModel : ViewModel() {
         }
     }
 
-    fun setUserNames(firstName: String, lastName: String) {
+    fun setUserNames(firstName: String, lastName: String, email: String) {
         _firstName.postValue(firstName)
         _lastName.postValue(lastName)
+        _email.postValue(email)
         Log.d("FirstName:", _firstName.toString())
     }
 }
