@@ -124,7 +124,8 @@ class IncomeInputActivity : AppCompatActivity() {
 
         // Allow both integers and decimals
         input.inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
-
+        input.setText(enteredIncomeAmount.toString())
+        
         alertDialog.setView(input)
         alertDialog.setPositiveButton("OK") { _, _ ->
             val inputText = input.text.toString()
@@ -142,9 +143,9 @@ class IncomeInputActivity : AppCompatActivity() {
         val input = EditText(this)
         input.hint = "Enter Income Type"
         input.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_CAP_WORDS
-
+        input.setText(enteredIncomeType)
+        
         alertDialog.setView(input)
-
         alertDialog.setPositiveButton("OK") { _, _ ->
             // Capture the entered income type
             enteredIncomeType = input.text.toString()
