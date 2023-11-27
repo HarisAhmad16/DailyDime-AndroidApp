@@ -6,6 +6,7 @@
     android:orientation="vertical"
     android:padding="16dp">
 
+    <!-- Date Selection -->
     <LinearLayout
         android:id="@+id/layoutSelectDate"
         android:layout_width="match_parent"
@@ -72,7 +73,6 @@
 
     </LinearLayout>
 
-
     <View
         android:layout_width="match_parent"
         android:layout_height="2dp"
@@ -99,3 +99,4 @@
     </LinearLayout>
 
 </LinearLayout>
+

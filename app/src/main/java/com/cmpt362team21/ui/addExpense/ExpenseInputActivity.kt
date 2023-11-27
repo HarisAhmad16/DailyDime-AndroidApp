@@ -1,5 +1,6 @@
-package com.cmpt362team21.ui.income
+package com.cmpt362team21.ui.addExpense
 
+import android.app.AlertDialog
 import android.app.DatePickerDialog
 import android.os.Bundle
 import android.text.InputType
@@ -8,49 +9,46 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.cmpt362team21.R
-import com.cmpt362team21.databinding.FragmentIncomeInputDialogBinding
+import com.cmpt362team21.databinding.FragmentExpenseInputDialogBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
-class IncomeInputActivity : AppCompatActivity() {
+class ExpenseInputActivity : AppCompatActivity() {
     private lateinit var firestore: FirebaseFirestore
-    private var enteredIncomeAmount: Double = 0.0
-    private var enteredIncomeType: String = ""
+    private var enteredExpenseAmount: Double = 0.0
+    private var enteredExpenseType: String = ""
     private var selectedDate: Calendar? = null
-    private var _binding: FragmentIncomeInputDialogBinding? = null
+    private var _binding: FragmentExpenseInputDialogBinding? = null
     private val binding get() = _binding!!
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        _binding = FragmentIncomeInputDialogBinding.inflate(layoutInflater)
+        _binding = FragmentExpenseInputDialogBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-
         firestore = FirebaseFirestore.getInstance()
-
 
         // Set up click listener for date selection
         binding.layoutSelectDate.setOnClickListener {
             showDatePickerDialog()
         }
 
-        val btnSave: Button = binding.btnSaveIncome
+        val btnSave: Button = binding.btnSaveExpense
         btnSave.setOnClickListener {
-            saveIncomeDataToFirestore()
+            saveExpenseDataToFirestore()
             finish()
         }
 
-        val btnCancel: Button = binding.btnCancelIncome
+        val btnCancel: Button = binding.btnCancelExpense
         btnCancel.setOnClickListener {
             Toast.makeText(
-                this@IncomeInputActivity,
-                "Income Entry Cancelled",
+                this@ExpenseInputActivity,
+                "Expense Entry Cancelled",
                 Toast.LENGTH_SHORT
             ).show()
             finish()
@@ -59,7 +57,7 @@ class IncomeInputActivity : AppCompatActivity() {
         setupDialogListeners()
     }
 
-    private fun saveIncomeDataToFirestore() {
+    private fun saveExpenseDataToFirestore() {
         val currentUser = FirebaseAuth.getInstance().currentUser
 
         if (currentUser != null && selectedDate != null) {
@@ -67,24 +65,24 @@ class IncomeInputActivity : AppCompatActivity() {
             val dateFormat = SimpleDateFormat("yyyy MMM dd", Locale.getDefault())
             val formattedDate = dateFormat.format(selectedDate!!.time)
 
-            // Create a new income object with user UID
-            val income = hashMapOf(
-                "type" to enteredIncomeType,
-                "amount" to enteredIncomeAmount,
+            // Create a new expense object with user UID
+            val expense = hashMapOf(
+                "type" to enteredExpenseType,
+                "amount" to enteredExpenseAmount,
                 "date" to formattedDate,
                 "userId" to currentUser.uid
             )
 
             // Add a new document with a generated ID
-            firestore.collection("incomes")
-                .add(income)
+            firestore.collection("expenses")
+                .add(expense)
                 .addOnSuccessListener {
-                    Log.d("Firestore", "Income data saved successfully")
-                    Toast.makeText(this, "Income data saved successfully", Toast.LENGTH_SHORT).show()
+                    Log.d("Firestore", "Expense data saved successfully")
+                    Toast.makeText(this, "Expense data saved successfully", Toast.LENGTH_SHORT).show()
                 }
                 .addOnFailureListener { e ->
-                    Log.e("Firestore", "Failed to save income data", e)
-                    Toast.makeText(this, "Failed to save income data", Toast.LENGTH_SHORT).show()
+                    Log.e("Firestore", "Failed to save expense data", e)
+                    Toast.makeText(this, "Failed to save expense data", Toast.LENGTH_SHORT).show()
                 }
         } else {
             // Handle the case when selectedDate is null or user is not logged in (optional)
@@ -93,12 +91,10 @@ class IncomeInputActivity : AppCompatActivity() {
         }
     }
 
-
-
     private fun setupDialogListeners() {
         setLayoutClickListener(R.id.layoutSelectDate, "Date")
-        setLayoutClickListener(R.id.layoutIncomeType, "Income Type")
-        setLayoutClickListener(R.id.layoutIncomeAmount, "Income Amount")
+        setLayoutClickListener(R.id.layoutExpenseType, "Expense Type")
+        setLayoutClickListener(R.id.layoutExpenseAmount, "Expense Amount")
     }
 
     private fun setLayoutClickListener(layoutId: Int, title: String) {
@@ -108,50 +104,49 @@ class IncomeInputActivity : AppCompatActivity() {
                 "Date" -> {
                     showDatePickerDialog()
                 }
-                "Income Type" -> {
-                    showIncomeTypeDialog()
+                "Expense Type" -> {
+                    showExpenseTypeDialog()
                 }
-                "Income Amount" -> {
-                    showIncomeAmountDialog()
+                "Expense Amount" -> {
+                    showExpenseAmountDialog()
                 }
             }
         }
     }
 
-    private fun showIncomeAmountDialog() {
+    private fun showExpenseAmountDialog() {
         val alertDialog = AlertDialog.Builder(this)
-        alertDialog.setTitle("Income Amount")
+        alertDialog.setTitle("Expense Amount")
         val input = EditText(this)
-        input.hint = "Enter Income Amount"
+        input.hint = "Enter Expense Amount"
 
         // Allow both integers and decimals
         input.inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
-        input.setText(enteredIncomeAmount.toString())
-        
+        input.setText(enteredExpenseAmount.toString())
+
         alertDialog.setView(input)
         alertDialog.setPositiveButton("OK") { _, _ ->
             val inputText = input.text.toString()
-            enteredIncomeAmount = if (inputText.isNotBlank()) inputText.toDouble() else 0.0
+            enteredExpenseAmount = if (inputText.isNotBlank()) inputText.toDouble() else 0.0
         }
         alertDialog.setNegativeButton("Cancel") { dialog, _ -> dialog.cancel() }
         alertDialog.show()
     }
 
-
-    private fun showIncomeTypeDialog() {
+    private fun showExpenseTypeDialog() {
         val alertDialog = AlertDialog.Builder(this)
-        alertDialog.setTitle("Income Type")
+        alertDialog.setTitle("Expense Type")
 
         val input = EditText(this)
-        input.hint = "Enter Income Type"
+        input.hint = "Enter Expense Type"
         input.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_CAP_WORDS
-        input.setText(enteredIncomeType)
-        
+        input.setText(enteredExpenseType)
+
         alertDialog.setView(input)
         alertDialog.setPositiveButton("OK") { _, _ ->
-            // Capture the entered income type
-            enteredIncomeType = input.text.toString()
-            // Handle the entered income type (if needed)
+            // Capture the entered expense type
+            enteredExpenseType = input.text.toString()
+            // Handle the entered expense type (if needed)
         }
 
         alertDialog.setNegativeButton("Cancel") { dialog, _ -> dialog.cancel() }
@@ -183,3 +178,4 @@ class IncomeInputActivity : AppCompatActivity() {
         _binding = null
     }
 }
+

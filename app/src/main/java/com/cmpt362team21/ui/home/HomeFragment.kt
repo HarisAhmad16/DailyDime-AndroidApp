@@ -5,26 +5,34 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
+import com.cmpt362team21.R
 import com.cmpt362team21.databinding.FragmentHomeBinding
 
 class HomeFragment : Fragment() {
-
     private var _binding: FragmentHomeBinding? = null
-
-    // This property is only valid between onCreateView and
-    // onDestroyView.
     private val binding get() = _binding!!
+
+    private val homeViewModel: HomeViewModel = HomeViewModel.getInstance()
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val homeViewModel =
-            ViewModelProvider(this).get(HomeViewModel::class.java)
-
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
+
+        homeViewModel.firstName.observe(viewLifecycleOwner) { firstName ->
+            binding.firstUserName.text = firstName
+        }
+
+        homeViewModel.lastName.observe(viewLifecycleOwner) { lastName ->
+            binding.lastUserName.text = lastName
+        }
+
+        binding.profileSection.setOnClickListener {
+            findNavController().navigate(R.id.nav_profile)
+        }
 
         return binding.root
     }

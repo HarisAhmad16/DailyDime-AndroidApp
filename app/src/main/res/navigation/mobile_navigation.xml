@@ -13,7 +13,7 @@
 
     <fragment
         android:id="@+id/nav_slideshow"
-        android:name="com.cmpt362team21.ui.slideshow.SlideshowFragment"
+        android:name="com.cmpt362team21.ui.addExpense.AddExpenseFragment"
         android:label="@string/menu_slideshow"
         tools:layout="@layout/fragment_slideshow" />
 
@@ -26,7 +26,7 @@
     <fragment
         android:id="@+id/nav_expense_tracker"
         android:name="com.cmpt362team21.ui.expenseTracker.ExpenseTrackerFragment"
-        android:label="fragment_expense_tracker"
+        android:label="@string/menu_expense_tracker"
         tools:layout="@layout/fragment_expense_tracker" />
 
     <fragment
@@ -34,5 +34,11 @@
         android:name="com.cmpt362team21.ui.importCSV.ImportCSVFragment"
         android:label="Visualize Finances"
         tools:layout="@layout/fragment_import_csv" />
+
+    <fragment
+        android:id="@+id/nav_profile"
+        android:name="com.cmpt362team21.ui.profile.ProfileFragment"
+        android:label="@string/menu_profile"
+        tools:layout="@layout/fragment_profile" />
 
 </navigation>
