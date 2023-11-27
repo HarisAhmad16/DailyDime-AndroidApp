@@ -158,6 +158,4 @@ class IncomeFragment : Fragment() {
         val date = format.parse(abbreviation)
         return SimpleDateFormat("MMMM", Locale.US).format(date)
     }
-
-
 }

@@ -13,7 +13,7 @@
 
     <fragment
         android:id="@+id/nav_slideshow"
-        android:name="com.cmpt362team21.ui.slideshow.SlideshowFragment"
+        android:name="com.cmpt362team21.ui.addExpense.AddExpenseFragment"
         android:label="@string/menu_slideshow"
         tools:layout="@layout/fragment_slideshow" />
 
