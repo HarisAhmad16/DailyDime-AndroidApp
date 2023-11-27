@@ -113,9 +113,13 @@ class ExpenseTrackerFragment : Fragment() {
 
                     noExpensesTextView.visibility = if (expenseList.isEmpty()) View.VISIBLE else View.GONE
 
-                    val adapter = ExpenseAdapter(requireContext(), expenseList, {expenseId -> deleteExpenseFromDB(expenseId)}, {expenseItem -> showEditDialog(expenseItem)})
-                    expensesListView.adapter = adapter
-                    adapter.notifyDataSetChanged()
+                    if (isAdded) {
+                        val adapter = ExpenseAdapter(requireContext(), expenseList, { expenseId -> deleteExpenseFromDB(expenseId) }, { expenseItem -> showEditDialog(expenseItem) })
+                        expensesListView.adapter = adapter
+                        adapter.notifyDataSetChanged()
+                    } else {
+                        Log.e("FragmentError", "Fragment not attached to a context")
+                    }
                 }
             }
     }
