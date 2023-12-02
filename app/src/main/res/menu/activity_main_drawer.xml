@@ -24,5 +24,10 @@
             android:id="@+id/nav_import_csv"
             android:icon="@drawable/graph_icon"
             android:title="Import CSV" />
+
+        <item
+            android:id="@+id/nav_investments"
+            android:icon="@drawable/graph_icon"
+            android:title="Investments" />
     </group>
 </menu>
