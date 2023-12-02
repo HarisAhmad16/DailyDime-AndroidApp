@@ -41,4 +41,10 @@
         android:label="@string/menu_profile"
         tools:layout="@layout/fragment_profile" />
 
+    <activity
+        android:id="@+id/nav_bank_tracker"
+        android:name="com.cmpt362team21.ui.bankLocator.BankAtmLocator"
+        android:label="Bank/Atm Locator"
+        tools:layout="@layout/activity_bank_atm_locator" />
+
 </navigation>
