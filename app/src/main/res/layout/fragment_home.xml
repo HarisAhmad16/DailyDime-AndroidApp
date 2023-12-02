@@ -88,11 +88,11 @@
                 android:textSize="18sp" />
 
             <TextView
+                android:id="@+id/incomeAmount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/incomeText"
                 android:layout_centerHorizontal="true"
-                android:text="$1000"
                 android:textColor="#ffffff"
                 android:textSize="18sp" />
         </RelativeLayout>
@@ -118,11 +118,11 @@
                 android:textSize="18sp" />
 
             <TextView
+                android:id="@+id/expensesAmount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/expensesText"
                 android:layout_centerHorizontal="true"
-                android:text="$500"
                 android:textColor="#ffffff"
                 android:textSize="18sp" />
         </RelativeLayout>
