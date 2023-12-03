@@ -8,6 +8,10 @@ import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
+import android.view.KeyEvent
+import android.view.inputmethod.EditorInfo
+import android.widget.EditText
+import android.widget.TextView
 
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -31,12 +35,14 @@ class BankAtmLocator : AppCompatActivity(), OnMapReadyCallback, LocationListener
     private lateinit var locationManager: LocationManager
     private lateinit var markerOptions: MarkerOptions
     private var mapCentered = false
+    private lateinit var searchEditText: EditText
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_bank_atm_locator)
         val mapFragment = supportFragmentManager.findFragmentById(R.id.map)
                 as SupportMapFragment
         mapFragment.getMapAsync(this)
+        searchEditText.findViewById<EditText>(R.id.searchBar)
 
     }
 
@@ -54,9 +60,31 @@ class BankAtmLocator : AppCompatActivity(), OnMapReadyCallback, LocationListener
         }
     }
 
+    private fun handleSearch() {
+        // Set an OnEditorActionListener on the EditText
+        searchEditText.setOnEditorActionListener(object : TextView.OnEditorActionListener {
+            override fun onEditorAction(textView: TextView?, actionId: Int, event: KeyEvent?): Boolean {
+                // Check if the action is a search action or the Enter key is pressed
+                if (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_ACTION_DONE
+                    || (event?.action == KeyEvent.ACTION_DOWN && event.keyCode == KeyEvent.KEYCODE_ENTER)
+                ) {
+                    searchLocation()
+                    return true  // Return true to indicate that the event has been handled
+                }
+                return false
+            }
+        })
+    }
+
+    private fun searchLocation() {
+        TODO("Not yet implemented")
+    }
+
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
         mMap.mapType = GoogleMap.MAP_TYPE_NORMAL
+        mMap.isMyLocationEnabled = true
+        mMap.uiSettings.isMyLocationButtonEnabled = false
         markerOptions = MarkerOptions()
         checkPermission()
     }
@@ -69,8 +97,8 @@ class BankAtmLocator : AppCompatActivity(), OnMapReadyCallback, LocationListener
         if (!mapCentered) {
             val cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 17f)
             mMap.animateCamera(cameraUpdate)
-            markerOptions.position(latLng)
-            mMap.addMarker(markerOptions)
+            //markerOptions.position(latLng)
+            //mMap.addMarker(markerOptions)
             //polylineOptions.add(latLng)
             mapCentered = true
         }

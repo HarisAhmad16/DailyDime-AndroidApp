@@ -12,4 +12,37 @@
         tools:context=".MapsActivity"
         android:name="com.google.android.gms.maps.SupportMapFragment" />
 
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginLeft="10dp"
+        android:elevation="10dp"
+        android:background="@color/white"
+        android:id="@+id/relativeLayout">
+
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:id="@+id/map_search"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="10dp"
+            android:src="@drawable/ic_search"/>
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_toRightOf="@+id/map_search"
+            android:layout_centerVertical="true"
+            android:textSize="15sp"
+            android:textColor="@color/black"
+            android:id="@+id/searchBar"
+            android:background="@color/white"
+            android:hint="Search for a bank/atm (city, postal code, or a name)"/>
+
+
+
+    </RelativeLayout>
+
 </FrameLayout>
