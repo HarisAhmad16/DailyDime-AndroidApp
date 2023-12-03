@@ -97,7 +97,6 @@ class IncomeFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        _binding = null
     }
 
     private fun setupDatabaseListener(selectedMonth: String ) {
