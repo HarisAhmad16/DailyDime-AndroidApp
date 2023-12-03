@@ -4,8 +4,11 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.Toast
+import androidx.cardview.widget.CardView
 import androidx.fragment.app.Fragment
+import com.cmpt362team21.R
 import com.cmpt362team21.databinding.FragmentProfileBinding
 import com.cmpt362team21.ui.home.HomeViewModel
 import com.google.firebase.auth.FirebaseAuth
@@ -35,6 +38,14 @@ class ProfileFragment : Fragment() {
         return binding.root
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        val profileCardView: CardView = requireView().findViewById(R.id.profile_pic)
+        val profileImageView: ImageView = profileCardView.getChildAt(0) as ImageView
+        val newImageResourceId = R.drawable.profile_photo
+        profileImageView.setImageResource(newImageResourceId)
+    }
+
     private fun updateProfile() {
         val user = firebaseAuth.currentUser
         val uid = user?.uid
@@ -58,6 +69,7 @@ class ProfileFragment : Fragment() {
                 homeViewModel.updateLastName(newLastName)
 
                 Toast.makeText(requireContext(), "Profile updated successfully", Toast.LENGTH_SHORT).show()
+                activity?.supportFragmentManager?.popBackStack()
             } else {
                 Toast.makeText(requireContext(), "Passwords do not match", Toast.LENGTH_SHORT).show()
             }
@@ -65,9 +77,6 @@ class ProfileFragment : Fragment() {
             Toast.makeText(requireContext(), "User not authenticated", Toast.LENGTH_SHORT).show()
         }
     }
-
-
-
 
     override fun onDestroyView() {
         super.onDestroyView()

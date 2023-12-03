@@ -4,6 +4,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
+import androidx.cardview.widget.CardView
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.anychart.AnyChart
@@ -43,7 +45,7 @@ class HomeFragment : Fragment() {
         }
 
 
-        binding.profileSection.setOnClickListener {
+        binding.profileProfileSection.setOnClickListener {
             findNavController().navigate(R.id.nav_profile)
         }
 
@@ -140,7 +142,7 @@ class HomeFragment : Fragment() {
                                 }
                                 binding.mostCommonExpenseTotal.post {
                                     binding.mostCommonExpenseTotal.text = String.format(
-                                        "This expense takes up %.1f%% of all incomes",
+                                        "This expense takes up %.1f%% of all expenses",
                                         percentage
                                     )
                                 }
@@ -151,21 +153,26 @@ class HomeFragment : Fragment() {
         }
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        val profileCardView: CardView = requireView().findViewById(R.id.profile_pic)
+        val profileImageView: ImageView = profileCardView.getChildAt(0) as ImageView
+        val newImageResourceId = R.drawable.profile_photo
+        profileImageView.setImageResource(newImageResourceId)
+    }
+
 
     private fun updatePieChart(totalIncome: Double, totalExpense: Double, pie: Pie) {
         val data: MutableList<DataEntry> = ArrayList()
         data.add(ValueDataEntry("Income", totalIncome))
         data.add(ValueDataEntry("Expenses", totalExpense))
-
         pie.data(data)
         pie.title("Income vs Expenses")
-
         binding.placeholder.setChart(pie)
     }
 
     private fun findMostCommonType(list: List<Pair<String, Double>>): Pair<String, Double> {
         val typeFrequencyMap = mutableMapOf<String, Int>()
-
         for ((type, _) in list) {
             typeFrequencyMap[type] = typeFrequencyMap.getOrDefault(type, 0) + 1
         }
@@ -181,7 +188,6 @@ class HomeFragment : Fragment() {
         }
 
         val percentage = (maxFrequency.toDouble() / list.size) * 100.0
-
         return Pair(mostCommonType, percentage)
     }
 }
