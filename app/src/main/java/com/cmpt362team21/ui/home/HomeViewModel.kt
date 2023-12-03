@@ -24,9 +24,18 @@ class HomeViewModel : ViewModel() {
     }
 
     fun setUserNames(firstName: String, lastName: String, email: String) {
-        _firstName.postValue(firstName)
-        _lastName.postValue(lastName)
-        _email.postValue(email)
-        Log.d("FirstName:", _firstName.toString())
+        _firstName.value = firstName
+        _lastName.value = lastName
+        _email.value = email
+        Log.d("FirstName:", _firstName.value.toString())
+    }
+
+    fun updateFirstName(newFirstName: String) {
+        _firstName.value = newFirstName
+    }
+
+    fun updateLastName(newLastName: String) {
+        _lastName.value = newLastName
     }
 }
+

@@ -34,7 +34,7 @@
             <ImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                tools:src="@tools:sample/avatars" />
+                tools:src="@drawable/profile_photo" />
 
         </androidx.cardview.widget.CardView>
     </RelativeLayout>
@@ -52,40 +52,19 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/profile_profile_section">
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/emailLayoutBottom"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:background="@color/grey"
-            app:boxStrokeColor="@color/white"
-            app:hintTextColor="@color/black"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/emailEtBottom"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/type_your_email"
-                android:inputType="textEmailAddress" />
-        </com.google.android.material.textfield.TextInputLayout>
+        app:layout_constraintTop_toBottomOf="@id/profile_profile_section" >
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/passwordLayoutBottom"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
             android:background="@color/grey"
             app:boxStrokeColor="@color/white"
             app:hintTextColor="@color/black"
-            app:passwordToggleEnabled="true"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/emailLayoutBottom">
+            app:layout_constraintTop_toTopOf="parent"
+            app:passwordToggleEnabled="true" >
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/passETBottom"
