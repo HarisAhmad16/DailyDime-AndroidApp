@@ -19,6 +19,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.cmpt362team21.R
 import com.cmpt362team21.databinding.FragmentAddExpenseBinding
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -78,15 +79,15 @@ class AddExpenseFragment : Fragment() {
                 id: Long
             ) {
                 // Handle item selection, and update the database listener accordingly
-                setupDatabaseListener(months[position])
+                setupExpenseDatabaseListener(months[position])
             }
 
             override fun onNothingSelected(parentView: AdapterView<*>) {
-                setupDatabaseListener("January")
+                setupExpenseDatabaseListener("January")
             }
         }
 
-        setupDatabaseListener("January")
+        setupExpenseDatabaseListener("January")
         adapterExpense = ExpenseAdapter(requireContext(), expenseItems)
         // Set up the ListView with the custom adapter
         val listViewExpenses: ListView = binding.listViewExpense
@@ -106,62 +107,58 @@ class AddExpenseFragment : Fragment() {
         return root
     }
 
-    private fun setupDatabaseListener(selectedMonth: String) {
-        val currentBinding = binding
-        if (currentBinding == null) {
-            Log.e("AddExpenseFragment", "Binding is null in setupDatabaseListener")
-            return
-        }
-
+    private fun setupExpenseDatabaseListener(selectedMonth: String) {
         val db = FirebaseFirestore.getInstance()
+        val currentUser = FirebaseAuth.getInstance().currentUser
         val expenseCollection = db.collection("expenses")
 
-        expenseCollection.addSnapshotListener { snapshot, exception ->
-            if (exception != null) {
-                Log.e("Firestore", "Listen failed.", exception)
-                return@addSnapshotListener
-            }
+        if (currentUser != null) {
+            expenseCollection.whereEqualTo("userId", currentUser.uid)
+                .addSnapshotListener { snapshot, exception ->
+                    if (exception != null) {
+                        Log.e("Firestore", "Listen failed.", exception)
+                        return@addSnapshotListener
+                    }
 
-            if (snapshot != null) {
-                val newExpenseItems = mutableListOf<ExpenseItem>()
-                var totalExpense = 0.0
-                var currentBalance = 0.0
+                    if (snapshot != null) {
+                        val newExpenseItems = mutableListOf<ExpenseItem>()
+                        var totalExpense = 0.0
+                        var currentBalance = 0.0
 
-                for (document in snapshot.documents) {
-                    val type = document.getString("type") ?: ""
-                    val amount = document.getDouble("amount") ?: 0.0
-                    currentBalance += amount
-                    val date = document.getString("date") ?: ""
-                    val documentMonth = date.split(" ")[1]
-                    val documentMonthFull = convertToFullMonth(documentMonth)
-                    Log.d(
-                        "Firestore",
-                        "Document Month: $documentMonthFull, Selected Month: $selectedMonth"
-                    )
-                    // Check if the document's month matches the selected month
-                    if (selectedMonth == "All Months" || selectedMonth == documentMonthFull) {
-                        val expenseItem =
-                            ExpenseItem(type, "-$amount", date) // Use '-' to indicate expense
-                        newExpenseItems.add(expenseItem)
+                        for (document in snapshot.documents) {
+                            val type = document.getString("type") ?: ""
+                            val amount = document.getDouble("amount") ?: 0.0
+                            currentBalance -= amount
+                            val date = document.getString("date") ?: ""
+                            val documentMonth = date.split(" ")[1]
+                            val documentMonthFull = convertToFullMonth(documentMonth)
+                            Log.d("Firestore", "Document Month: $documentMonthFull, Selected Month: $selectedMonth")
 
-                        // Update totalExpense with the current amount
-                        totalExpense += amount
+                            // Check if the document's month matches the selected month
+                            if (selectedMonth == "All Months" || selectedMonth == documentMonthFull) {
+                                val expenseItem = ExpenseItem(type, "-$amount", date)
+                                newExpenseItems.add(expenseItem)
+
+                                // Update totalExpense with the current amount
+                                totalExpense += amount
+                            }
+                        }
+
+                        // Update the expenseItems list with the new data
+                        expenseItems.clear()
+                        expenseItems.addAll(newExpenseItems)
+
+                        // Notify the adapter that the data has changed
+                        adapterExpense.notifyDataSetChanged()
+
+                        // Update the totalExpense TextView
+                        binding.totalExpense.text = String.format("Total Expense: $%.2f", totalExpense)
+                        binding.currentBalance.text = String.format("$%.2f", currentBalance)
                     }
                 }
-
-                // Update the expenseItems list with the new data
-                expenseItems.clear()
-                expenseItems.addAll(newExpenseItems)
-
-                // Notify the adapter that the data has changed
-                adapterExpense.notifyDataSetChanged()
-
-                // Update the totalExpense TextView
-                currentBinding.totalExpense.text = String.format("Total Expense: $%.2f", totalExpense)
-                currentBinding.currentBalance.text = String.format("$%.2f", currentBalance)
-            }
         }
     }
+
 
 
     private fun convertToFullMonth(abbreviation: String): String {
