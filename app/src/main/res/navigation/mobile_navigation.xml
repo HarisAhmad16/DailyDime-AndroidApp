@@ -44,6 +44,8 @@
 
 
 
+
+
     <activity
         android:id="@+id/nav_bank_tracker"
         android:name="com.cmpt362team21.ui.bankLocator.BankAtmLocator"
