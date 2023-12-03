@@ -9,11 +9,11 @@ import androidx.navigation.fragment.findNavController
 import com.anychart.AnyChart
 import com.anychart.chart.common.dataentry.DataEntry
 import com.anychart.chart.common.dataentry.ValueDataEntry
+import com.anychart.charts.Pie
 import com.cmpt362team21.R
 import com.cmpt362team21.databinding.FragmentHomeBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlin.math.exp
 
 class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
@@ -21,6 +21,8 @@ class HomeFragment : Fragment() {
 
     private val homeViewModel: HomeViewModel = HomeViewModel.getInstance()
 
+    private val incomeList = mutableListOf<Pair<String, Double>>()
+    private val expenseList = mutableListOf<Pair<String, Double>>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -39,6 +41,7 @@ class HomeFragment : Fragment() {
         homeViewModel.lastName.observe(viewLifecycleOwner) { lastName ->
             binding.lastUserName.text = lastName
         }
+
 
         binding.profileSection.setOnClickListener {
             findNavController().navigate(R.id.nav_profile)
@@ -68,6 +71,8 @@ class HomeFragment : Fragment() {
         var totalIncome = 0.0
         var totalExpense = 0.0
 
+        val pie = AnyChart.pie()
+
         if (currentUser != null) {
             incomeCollection.whereEqualTo("userId", currentUser.uid)
                 .addSnapshotListener { snapshot, exception ->
@@ -77,15 +82,29 @@ class HomeFragment : Fragment() {
 
                     if (snapshot != null) {
                         for (document in snapshot.documents) {
+                            val type = document.getString("type") ?: ""
                             val amount = document.getDouble("amount") ?: 0.0
                             incomeBalance += amount
+                            incomeList.add(Pair(type, amount))
                         }
                         totalIncome = incomeBalance
 
                         if (isAdded) {
                             requireActivity().runOnUiThread {
                                 getFragmentBinding().incomeAmount.text = String.format("$%.2f", incomeBalance)
-                                updatePieChart(totalIncome, totalExpense)
+                            }
+                            binding.placeholder.post {
+                                updatePieChart(totalIncome, totalExpense, pie)
+                            }
+                            val (mostCommonType, percentage) = findMostCommonType(incomeList)
+                            if (isAdded) {
+                                binding.mostCommonIncomeType.post {
+                                    binding.mostCommonIncomeType.text = mostCommonType
+                                }
+
+                                binding.mostCommonIncomeTotal.post {
+                                    binding.mostCommonIncomeTotal.text = String.format("This income takes up %.1f%% of all incomes", percentage)
+                                }
                             }
                         }
                     }
@@ -100,7 +119,9 @@ class HomeFragment : Fragment() {
                     if (snapshot != null) {
                         for (document in snapshot.documents) {
                             val amount = document.getDouble("amount") ?: 0.0
+                            val type = document.getString("type") ?: ""
                             expenseBalance += amount
+                            expenseList.add(Pair(type, amount))
                         }
                         totalExpense = expenseBalance
 
@@ -108,7 +129,21 @@ class HomeFragment : Fragment() {
                             requireActivity().runOnUiThread {
                                 getFragmentBinding().expensesAmount.text =
                                     String.format("$%.2f", expenseBalance)
-                                updatePieChart(totalIncome, totalExpense)
+                            }
+                            binding.placeholder.post {
+                                updatePieChart(totalIncome, totalExpense, pie)
+                            }
+                            val (mostCommonType, percentage) = findMostCommonType(expenseList)
+                            if (isAdded) {
+                                binding.mostCommonExpenseType.post {
+                                    binding.mostCommonExpenseType.text = mostCommonType
+                                }
+                                binding.mostCommonExpenseTotal.post {
+                                    binding.mostCommonExpenseTotal.text = String.format(
+                                        "This expense takes up %.1f%% of all incomes",
+                                        percentage
+                                    )
+                                }
                             }
                         }
                     }
@@ -117,8 +152,7 @@ class HomeFragment : Fragment() {
     }
 
 
-    private fun updatePieChart(totalIncome: Double, totalExpense: Double) {
-        val pie = AnyChart.pie()
+    private fun updatePieChart(totalIncome: Double, totalExpense: Double, pie: Pie) {
         val data: MutableList<DataEntry> = ArrayList()
         data.add(ValueDataEntry("Income", totalIncome))
         data.add(ValueDataEntry("Expenses", totalExpense))
@@ -126,8 +160,29 @@ class HomeFragment : Fragment() {
         pie.data(data)
         pie.title("Income vs Expenses")
 
-        // Set up AnyChartView
         binding.placeholder.setChart(pie)
+    }
+
+    private fun findMostCommonType(list: List<Pair<String, Double>>): Pair<String, Double> {
+        val typeFrequencyMap = mutableMapOf<String, Int>()
+
+        for ((type, _) in list) {
+            typeFrequencyMap[type] = typeFrequencyMap.getOrDefault(type, 0) + 1
+        }
+
+        var mostCommonType = ""
+        var maxFrequency = 0
+
+        for ((type, frequency) in typeFrequencyMap) {
+            if (frequency > maxFrequency) {
+                mostCommonType = type
+                maxFrequency = frequency
+            }
+        }
+
+        val percentage = (maxFrequency.toDouble() / list.size) * 100.0
+
+        return Pair(mostCommonType, percentage)
     }
 }
 
