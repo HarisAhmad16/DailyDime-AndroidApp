@@ -87,8 +87,8 @@ class IncomeInputActivity : AppCompatActivity() {
                     Toast.makeText(this, "Failed to save income data", Toast.LENGTH_SHORT).show()
                 }
         } else {
-            // Handle the case when selectedDate is null or user is not logged in (optional)
-            Log.d("Firestore", "Please select a date or log in")
+            // Handle the case when selectedDate is null
+            Log.d("Firestore", "Please select a date")
             Toast.makeText(this, "Please select a date or log in", Toast.LENGTH_SHORT).show()
         }
     }
