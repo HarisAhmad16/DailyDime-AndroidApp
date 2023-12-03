@@ -164,9 +164,16 @@ class HomeFragment : Fragment() {
 
     private fun updatePieChart(totalIncome: Double, totalExpense: Double, pie: Pie) {
         val data: MutableList<DataEntry> = ArrayList()
-        data.add(ValueDataEntry("Income", totalIncome))
-        data.add(ValueDataEntry("Expenses", totalExpense))
+
+        data.add(ValueDataEntry("Income", totalIncome).apply {
+            setValue("fill", "#69DA6D")
+        })
+        data.add(ValueDataEntry("Expenses", totalExpense).apply {
+            setValue("fill", "#DA6969")
+        })
+
         pie.data(data)
+        pie.background("#000000")
         pie.title("Income vs Expenses")
         binding.placeholder.setChart(pie)
     }
