@@ -40,4 +40,7 @@
     <string name="month_prompt">Select Month</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="latest_price_format">Latest Price: $%.2f</string>
+    <string name="profit_loss_format">Profit/Loss: $%.2f</string>
+
 </resources>

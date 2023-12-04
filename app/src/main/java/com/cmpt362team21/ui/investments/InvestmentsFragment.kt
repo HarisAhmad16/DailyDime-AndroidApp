@@ -15,6 +15,9 @@ import com.cmpt362team21.R
 import com.cmpt362team21.databinding.FragmentInvestmentsBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import org.json.JSONObject
+import java.net.URL
+import kotlin.concurrent.thread
 
 data class Stock(
     val symbol: String = "",
@@ -29,7 +32,8 @@ class InvestmentsFragment : Fragment() {
     private lateinit var viewModel: InvestmentsViewModel
     private lateinit var auth: FirebaseAuth
     private lateinit var firestore: FirebaseFirestore
-    private lateinit var adapter: StockAdapter // Ensure that you have declared the adapter
+    private lateinit var adapter: StockAdapter
+    private val alphaVantageApiKey = "MOS192R50R4R9OK1"
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -52,6 +56,8 @@ class InvestmentsFragment : Fragment() {
         binding.stockListLayout.adapter = adapter
 
         displayStocks()
+        fetchStockPrices()
+
 
         return root
     }
@@ -145,5 +151,59 @@ class InvestmentsFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private fun fetchStockPrices() {
+        thread {
+            for (stock in viewModel.stocks) {
+                val stockPrice = getStockPrice(stock.symbol)
+                updateStockPriceInFirebase(stock, stockPrice)
+            }
+        }
+    }
+
+
+    private fun getStockPrice(symbol: String): Double {
+        val apiUrl = "https://www.alphavantage.co/query"
+        val function = "GLOBAL_QUOTE"
+        val apiKey = alphaVantageApiKey
+
+        val url = "$apiUrl?function=$function&symbol=$symbol&apikey=$apiKey"
+
+        try {
+            val response = URL(url).readText()
+            val json = JSONObject(response)
+            val globalQuote = json.getJSONObject("Global Quote")
+            return globalQuote.getString("05. price").toDouble()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+        return 0.0
+    }
+
+    private fun updateStockPriceInFirebase(stock: Stock, latestPrice: Double) {
+        val currentUser = auth.currentUser
+        if (currentUser != null) {
+            val userId = currentUser.uid
+            val stocksCollection = firestore.collection("stocks")
+
+            stocksCollection.whereEqualTo("userId", userId)
+                .whereEqualTo("symbol", stock.symbol)
+                .get()
+                .addOnSuccessListener { documents ->
+                    for (document in documents) {
+                        document.reference.update("price", latestPrice)
+                    }
+                    displayStocks()
+                }
+                .addOnFailureListener { exception ->
+                    Toast.makeText(
+                        requireContext(),
+                        "Error updating stock price: $exception",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+        }
     }
 }
