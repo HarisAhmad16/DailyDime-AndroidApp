@@ -10,6 +10,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.WindowManager
 import android.widget.ImageView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -23,6 +24,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.Place
+import com.google.android.libraries.places.api.net.PlacesClient
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener
 import java.lang.NullPointerException
@@ -35,6 +37,8 @@ class BankAtmLocator : AppCompatActivity(), OnMapReadyCallback, LocationListener
     private lateinit var markerOptions: MarkerOptions
     private var mapCentered = false
     private lateinit var centerToUserLocationBtn:ImageView
+    private lateinit var placePickerBtn:ImageView
+    private lateinit var placesClient: PlacesClient
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_bank_atm_locator)
@@ -65,13 +69,13 @@ class BankAtmLocator : AppCompatActivity(), OnMapReadyCallback, LocationListener
                 if (cameraUpdate != null) {
                     mMap.animateCamera(cameraUpdate)
                 }
-
                 storePopUpInfo(place)
             }
         })
 
         centerToUserLocationBtn = findViewById(R.id.centerBtn)
         centerToUserLocationBtn.setOnClickListener{
+            Toast.makeText(this,"Centering to User's Current Location",Toast.LENGTH_SHORT).show()
             try {
                 val location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
                 if (location != null){
@@ -83,11 +87,53 @@ class BankAtmLocator : AppCompatActivity(), OnMapReadyCallback, LocationListener
                 e.printStackTrace()
             }
         }
+        placesClient = Places.createClient(this)
+        placePickerBtn = findViewById(R.id.mapPicker)
+        placePickerBtn.setOnClickListener{
+            Toast.makeText(this,"Finding Nearby Places at User's Location",Toast.LENGTH_SHORT).show()
+            requestNearbyPlaces()
+        }
 
     }
 
-    private fun storePopUpInfo(place:Place){
+    //https://developers.google.com/maps/documentation/places/android-sdk/current-place
+    private fun requestNearbyPlaces() {
+        try {
+            val location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+            if (location != null) {
 
+                val placeFields = listOf(
+                    Place.Field.LAT_LNG,
+                    Place.Field.NAME,
+                    Place.Field.ID,
+                    Place.Field.ADDRESS,
+                    Place.Field.RATING,
+                )
+
+                val request = com.google.android.libraries.places.api.net.FindCurrentPlaceRequest.builder(placeFields).build()
+
+                placesClient.findCurrentPlace(request)
+                    .addOnSuccessListener { response ->
+                        val places = response.placeLikelihoods
+                        for (likelihood in places) {
+                            val place = likelihood.place
+                            val latLng = place.latLng
+                            if (latLng != null) {
+                                markerOptions.position(latLng).title(place.name)
+                                storePopUpInfo(place)
+                            }
+                        }
+                    }
+                    .addOnFailureListener { exception ->
+                        Log.e("Places API", "Error getting nearby places: ${exception.message}")
+                    }
+            }
+        } catch (e: SecurityException) {
+            e.printStackTrace()
+        }
+    }
+
+    private fun storePopUpInfo(place:Place){
         mMap.setInfoWindowAdapter(InfoPopUpAdapter(this))
         if(place != null){
             try{
@@ -102,9 +148,7 @@ class BankAtmLocator : AppCompatActivity(), OnMapReadyCallback, LocationListener
                 e.printStackTrace()
             }
         }
-
     }
-
     private fun initLocationManager() {
         try {
             locationManager = getSystemService(LOCATION_SERVICE) as LocationManager
@@ -118,7 +162,6 @@ class BankAtmLocator : AppCompatActivity(), OnMapReadyCallback, LocationListener
             e.printStackTrace()
         }
     }
-
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
         mMap.mapType = GoogleMap.MAP_TYPE_NORMAL
@@ -128,9 +171,7 @@ class BankAtmLocator : AppCompatActivity(), OnMapReadyCallback, LocationListener
         checkPermission()
 
     }
-
     override fun onLocationChanged(location: Location) {
-        Log.d("LocationChanged", "New location: ${location.latitude}, ${location.longitude}")
         val lat = location.latitude
         val lng = location.longitude
         val latLng = LatLng(lat, lng)
@@ -141,7 +182,6 @@ class BankAtmLocator : AppCompatActivity(), OnMapReadyCallback, LocationListener
             mapCentered = true
         }
     }
-
     private fun hideKeyboard(){
         this.window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN)
     }
@@ -154,19 +194,15 @@ class BankAtmLocator : AppCompatActivity(), OnMapReadyCallback, LocationListener
         else
             initLocationManager()
     }
-
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == PERMISSION_REQUEST_CODE) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) initLocationManager()
         }
     }
-
     override fun onDestroy() {
         super.onDestroy()
         if (locationManager != null)
             locationManager.removeUpdates(this)
     }
-
-
 }

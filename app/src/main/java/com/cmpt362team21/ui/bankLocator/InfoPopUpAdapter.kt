@@ -8,7 +8,8 @@ import com.cmpt362team21.R
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.Marker
 
-
+//https://www.youtube.com/watch?v=DhYofrJPzlI&list=PLgCYzUzKIBE-vInwQhGSdnbyJ62nixHCt&index=11
+//Referred to this series for help with this feature
 class InfoPopUpAdapter(private val context: Context) : GoogleMap.InfoWindowAdapter {
 
     private val window: View by lazy {
