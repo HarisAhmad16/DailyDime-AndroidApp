@@ -16,6 +16,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.cmpt362team21.R
 import com.cmpt362team21.databinding.FragmentExpenseTrackerBinding
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -84,44 +85,54 @@ class ExpenseTrackerFragment : Fragment() {
 
     private fun getExpensesFromDB(selectedDate: String) {
         val db = FirebaseFirestore.getInstance()
+        val currentUser = FirebaseAuth.getInstance().currentUser
         val expenseCollection = db.collection("expenses")
 
-        expenseCollection.whereEqualTo("date", selectedDate)
-            .addSnapshotListener { snapshot, exception ->
-                if (exception != null) {
-                    Log.e("FireStore", "Listen failed.", exception)
-                    return@addSnapshotListener
-                }
+        if (currentUser != null) {
+            expenseCollection.whereEqualTo("userId", currentUser.uid)
+                .whereEqualTo("date", selectedDate)
+                .addSnapshotListener { snapshot, exception ->
+                    if (exception != null) {
+                        Log.e("FireStore", "Listen failed.", exception)
+                        return@addSnapshotListener
+                    }
 
-                if (snapshot != null) {
-                    expenseList = arrayListOf()
+                    if (snapshot != null) {
+                        expenseList = arrayListOf()
 
-                    for (expense in snapshot.documents) {
-                        val type = expense.getString("type") ?: ""
+                        for (expense in snapshot.documents) {
+                            val type = expense.getString("type") ?: ""
 
-                        val amount = when (val amountField = expense.get("amount")) {
-                            is Number -> amountField.toDouble()
-                            is String -> amountField.toDoubleOrNull() ?: 0.0
-                            else -> 0.0
+                            val amount = when (val amountField = expense.get("amount")) {
+                                is Number -> amountField.toDouble()
+                                is String -> amountField.toDoubleOrNull() ?: 0.0
+                                else -> 0.0
+                            }
+                            val relatedDate = expense.getString("date") ?: ""
+                            val userId = expense.getString("userId") ?: ""
+                            val expenseId = expense.id
+                            val userExpense =
+                                ExpenseItem(expenseId, userId, type, amount.toString(), relatedDate)
+                            expenseList.add(userExpense)
                         }
-                        val relatedDate = expense.getString("date") ?: ""
-                        val userId = expense.getString("userId") ?: ""
-                        val expenseId = expense.id
-                        val userExpense = ExpenseItem(expenseId,userId,type, amount.toString(), relatedDate)
-                        expenseList.add(userExpense)
-                    }
 
-                    noExpensesTextView.visibility = if (expenseList.isEmpty()) View.VISIBLE else View.GONE
+                        noExpensesTextView.visibility =
+                            if (expenseList.isEmpty()) View.VISIBLE else View.GONE
 
-                    if (isAdded) {
-                        val adapter = ExpenseAdapter(requireContext(), expenseList, { expenseId -> deleteExpenseFromDB(expenseId) }, { expenseItem -> showEditDialog(expenseItem) })
-                        expensesListView.adapter = adapter
-                        adapter.notifyDataSetChanged()
-                    } else {
-                        Log.e("FragmentError", "Fragment not attached to a context")
+                        if (isAdded) {
+                            val adapter = ExpenseAdapter(
+                                requireContext(),
+                                expenseList,
+                                { expenseId -> deleteExpenseFromDB(expenseId) },
+                                { expenseItem -> showEditDialog(expenseItem) })
+                            expensesListView.adapter = adapter
+                            adapter.notifyDataSetChanged()
+                        } else {
+                            Log.e("FragmentError", "Fragment not attached to a context")
+                        }
                     }
                 }
-            }
+        }
     }
 
     private fun deleteExpenseFromDB(expensesId: String) {
