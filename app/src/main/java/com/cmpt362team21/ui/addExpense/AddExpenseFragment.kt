@@ -112,6 +112,10 @@ class AddExpenseFragment : Fragment() {
         val currentUser = FirebaseAuth.getInstance().currentUser
         val expenseCollection = db.collection("expenses")
 
+        if (!isAdded) {
+            return
+        }
+
         if (currentUser != null) {
             expenseCollection.whereEqualTo("userId", currentUser.uid)
                 .addSnapshotListener { snapshot, exception ->
