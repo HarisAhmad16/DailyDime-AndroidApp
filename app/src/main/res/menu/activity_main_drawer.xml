@@ -29,5 +29,11 @@
             android:id="@+id/nav_investments"
             android:icon="@drawable/graph_icon"
             android:title="Investments" />
+
+        <item
+            android:id="@+id/nav_bank_tracker"
+            android:icon="@drawable/ic_map"
+            android:title="Bank/Atm Locator" />
+
     </group>
 </menu>
