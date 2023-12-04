@@ -1,27 +1,18 @@
 package com.cmpt362team21.ui.bankLocator
 
 import android.Manifest
-
 import android.content.pm.PackageManager
-import android.location.Address
-import android.location.Geocoder
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import android.view.KeyEvent
 import android.view.WindowManager
-import android.view.inputmethod.EditorInfo
-import android.widget.EditText
 import android.widget.ImageView
-import android.widget.TextView
-
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-
 import com.cmpt362team21.R
 import com.google.android.gms.common.api.Status
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -34,11 +25,8 @@ import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener
-import java.io.IOException
+import java.lang.NullPointerException
 
-
-// MAPS API KEY:
-//AIzaSyBGIwb4c3NXUNz87rrrVPPaf3IJXDnYXBk
 class BankAtmLocator : AppCompatActivity(), OnMapReadyCallback, LocationListener {
 
     private lateinit var mMap: GoogleMap
@@ -46,7 +34,6 @@ class BankAtmLocator : AppCompatActivity(), OnMapReadyCallback, LocationListener
     private lateinit var locationManager: LocationManager
     private lateinit var markerOptions: MarkerOptions
     private var mapCentered = false
-    //private lateinit var searchEditText: EditText
     private lateinit var centerToUserLocationBtn:ImageView
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -66,7 +53,6 @@ class BankAtmLocator : AppCompatActivity(), OnMapReadyCallback, LocationListener
                 Place.Field.ID))
 
         autoCompleteSupportFragment.setCountries("CA", "US")
-        //searchEditText = findViewById(R.id.searchBar)
 
         autoCompleteSupportFragment.setOnPlaceSelectedListener(object:PlaceSelectionListener {
             override fun onError(status: Status) {
@@ -75,28 +61,13 @@ class BankAtmLocator : AppCompatActivity(), OnMapReadyCallback, LocationListener
 
             override fun onPlaceSelected(place: Place) {
                 hideKeyboard()
-                place.id?.let { Log.d("Place id", it) }
-                place.address?.let { Log.d("Place Address", it) }
-                place.latLng?.let { Log.d("Place LatLng", it.toString()) }
-                place.rating?.let {Log.d("Place rating", it.toString())}
-                place.websiteUri?.let { Log.d("Place Website", it.toString()) }
-                place.name?.let { Log.d("Place name", it) }
-                place.phoneNumber?.let { Log.d("Place phone number", it) }
-
                 val cameraUpdate = place.latLng?.let { CameraUpdateFactory.newLatLngZoom(it, 17f) }
                 if (cameraUpdate != null) {
                     mMap.animateCamera(cameraUpdate)
                 }
-                place.latLng?.let { markerOptions.position(it).title(place.name) }
-                markerOptions.snippet("Address: " + place.address + "\n" +
-                "Rating: " + place.rating + "\n" +
-                "Phone Number: " + place.phoneNumber + "\n" +
-                "Website: " + place.websiteUri + "\n")
-                mMap.addMarker(markerOptions)
 
-
+                storePopUpInfo(place)
             }
-
         })
 
         centerToUserLocationBtn = findViewById(R.id.centerBtn)
@@ -109,6 +80,25 @@ class BankAtmLocator : AppCompatActivity(), OnMapReadyCallback, LocationListener
                     mMap.animateCamera(cameraUpdate)
                 }
             } catch (e:SecurityException){
+                e.printStackTrace()
+            }
+        }
+
+    }
+
+    private fun storePopUpInfo(place:Place){
+
+        mMap.setInfoWindowAdapter(InfoPopUpAdapter(this))
+        if(place != null){
+            try{
+                val popUpBody = "Address: " + place.address + "\n" +
+                        "Rating: " + place.rating + "\n" +
+                        "Phone Number: " + place.phoneNumber + "\n" +
+                        "Website: " + place.websiteUri + "\n"
+
+                place.latLng?.let { markerOptions.title(place.name).snippet(popUpBody).position(it) }
+                mMap.addMarker(markerOptions)
+            }catch (e:NullPointerException){
                 e.printStackTrace()
             }
         }
@@ -148,9 +138,6 @@ class BankAtmLocator : AppCompatActivity(), OnMapReadyCallback, LocationListener
         if (!mapCentered) {
             val cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 17f)
             mMap.animateCamera(cameraUpdate)
-            //markerOptions.position(latLng).title("My Location")
-            //mMap.addMarker(markerOptions)
-            //polylineOptions.add(latLng)
             mapCentered = true
         }
     }
