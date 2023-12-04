@@ -1,8 +1,10 @@
 package com.cmpt362team21.ui.importCSV
 
 import android.app.Activity
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.provider.DocumentsContract
@@ -22,7 +24,15 @@ import com.anychart.core.cartesian.series.Bar
 import com.anychart.enums.Anchor
 import com.cmpt362team21.databinding.FragmentImportCsvBinding
 import com.google.gson.Gson
+import android.graphics.Canvas
+import android.graphics.pdf.PdfDocument
+import android.os.Environment
+import android.widget.Toast
+import androidx.core.content.FileProvider
 import com.google.gson.reflect.TypeToken
+import java.io.File
+import java.io.FileOutputStream
+
 class ImportCSVFragment : Fragment() {
     private var _binding: FragmentImportCsvBinding? = null
     private var expensesChart: AnyChartView? = null
@@ -32,6 +42,75 @@ class ImportCSVFragment : Fragment() {
     private lateinit var pickFileLauncher: ActivityResultLauncher<Intent>
     private val entries: MutableList<CSVFileEntry> = mutableListOf()
     private val entriesKey = "entriesKey"
+
+    // pdf related code inspired by: https://www.geeksforgeeks.org/generate-pdf-file-in-android-using-kotlin/
+    private fun exportPDF() {
+        if (writeToExternalStorage()) {
+            val pdfDocument = PdfDocument()
+
+            val expensesChartPage = PdfDocument.PageInfo.Builder(1200, 700, 1).create()
+            val pageExpenses = pdfDocument.startPage(expensesChartPage)
+            val canvasExpenses: Canvas = pageExpenses.canvas
+            plotGraphOnPDF(canvasExpenses, expensesChart, "Expenses")
+            pdfDocument.finishPage(pageExpenses)
+
+            val incomeChartPage = PdfDocument.PageInfo.Builder(1200, 700, 2).create()
+            val pageIncomes = pdfDocument.startPage(incomeChartPage)
+            val canvasIncomes: Canvas = pageIncomes.canvas
+            plotGraphOnPDF(canvasIncomes, incomesChart, "Incomes")
+            pdfDocument.finishPage(pageIncomes)
+
+            val barChartPage = PdfDocument.PageInfo.Builder(1200, 700, 3).create()
+            val pageBar = pdfDocument.startPage(barChartPage)
+            val canvasBar: Canvas = pageBar.canvas
+            plotGraphOnPDF(canvasBar, barChartView, "Expenses vs Incomes")
+            pdfDocument.finishPage(pageBar)
+
+            val dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+            dir.mkdirs()
+
+            val pdfFile = File(dir, "finances.pdf")
+            try {
+                pdfDocument.writeTo(FileOutputStream(pdfFile))
+                Toast.makeText(requireContext(), "PDF was exported successfully", Toast.LENGTH_SHORT).show()
+            } catch (e: Exception) {
+                e.printStackTrace()
+                Toast.makeText(requireContext(), "Error while exporting PDF", Toast.LENGTH_SHORT).show()
+            }
+
+            pdfDocument.close()
+            openPDF(pdfFile)
+        } else {
+            Toast.makeText(requireContext(), "External storage is not available", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun plotGraphOnPDF(canvas: Canvas, chartView: AnyChartView?, chartTitle: String) {
+        APIlib.getInstance().setActiveAnyChartView(chartView)
+        val bitmap = Bitmap.createBitmap(chartView!!.width, chartView.height, Bitmap.Config.ARGB_8888)
+        val chartCanvas = Canvas(bitmap)
+        chartView.draw(chartCanvas)
+        canvas.drawBitmap(bitmap, 0f, 0f, null)
+    }
+
+    private fun writeToExternalStorage(): Boolean {
+        val state = Environment.getExternalStorageState()
+        return Environment.MEDIA_MOUNTED == state
+    }
+
+    private fun openPDF(file: File) {
+        val intent = Intent(Intent.ACTION_VIEW)
+        val uri = FileProvider.getUriForFile(requireContext(), "com.cmpt362team21.fileprovider", file)
+        intent.setDataAndType(uri, "application/pdf")
+        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+
+        try {
+            startActivity(intent)
+        } catch (e: ActivityNotFoundException) {
+            Toast.makeText(requireContext(), "Cannot view PDF", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     private fun List<CSVFileEntry>.toJson(): String {
         return Gson().toJson(this)
@@ -87,8 +166,14 @@ class ImportCSVFragment : Fragment() {
 
         setupFilePicker()
         setupImportButton()
+        setupExportButton()
 
         return binding.root
+    }
+    private fun setupExportButton() {
+        _binding?.btnExportPDF?.setOnClickListener {
+            exportPDF()
+        }
     }
 
     private fun setupFilePicker() {
