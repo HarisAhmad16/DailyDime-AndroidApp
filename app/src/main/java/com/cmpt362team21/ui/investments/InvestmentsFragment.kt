@@ -46,7 +46,9 @@ class InvestmentsFragment : Fragment() {
         }
 
         // Initialize the adapter
-        adapter = StockAdapter(requireContext(), viewModel.stocks)
+        adapter = StockAdapter(requireContext(), viewModel.stocks) { stock ->
+            deleteStock(stock)
+        }
         binding.stockListLayout.adapter = adapter
 
         displayStocks()
@@ -90,7 +92,6 @@ class InvestmentsFragment : Fragment() {
             val userId = currentUser.uid
             val stocksCollection = firestore.collection("stocks")
 
-            // Query stocks for the current user
             stocksCollection.whereEqualTo("userId", userId)
                 .get()
                 .addOnSuccessListener { documents ->
@@ -101,15 +102,38 @@ class InvestmentsFragment : Fragment() {
                         newStocks.add(stock)
                     }
 
-                    // Update the ViewModel with the new data
                     viewModel.stocks.clear()
                     viewModel.stocks.addAll(newStocks)
 
-                    // Notify the adapter that the data has changed
                     adapter.notifyDataSetChanged()
                 }
                 .addOnFailureListener { exception ->
                     Toast.makeText(requireContext(), "Error getting stocks: $exception", Toast.LENGTH_SHORT).show()
+                }
+        }
+    }
+
+    private fun deleteStock(stock: Stock) {
+        val currentUser = auth.currentUser
+        if (currentUser != null) {
+            val userId = currentUser.uid
+            val stocksCollection = firestore.collection("stocks")
+
+            stocksCollection.whereEqualTo("userId", userId)
+                .whereEqualTo("symbol", stock.symbol)
+                .get()
+                .addOnSuccessListener { documents ->
+                    for (document in documents) {
+                        document.reference.delete()
+                    }
+                    displayStocks()
+                }
+                .addOnFailureListener { exception ->
+                    Toast.makeText(
+                        requireContext(),
+                        "Error deleting stock: $exception",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
         }
     }

@@ -5,10 +5,15 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
+import android.widget.Button
 import android.widget.TextView
 import com.cmpt362team21.R
 
-class StockAdapter(private val context: Context, private val stocks: List<Stock>) : BaseAdapter() {
+class StockAdapter(
+    private val context: Context,
+    private val stocks: List<Stock>,
+    private val onDeleteClickListener: (Stock) -> Unit
+) : BaseAdapter() {
 
     override fun getCount(): Int {
         return stocks.size
@@ -39,7 +44,9 @@ class StockAdapter(private val context: Context, private val stocks: List<Stock>
         viewHolder.symbolTextView.text = stock.symbol
         viewHolder.quantityTextView.text = stock.quantity.toString()
         viewHolder.priceTextView.text = "$${stock.price}"
-
+        viewHolder.deleteButton.setOnClickListener {
+            onDeleteClickListener.invoke(stock)
+        }
         return view
     }
 
@@ -47,5 +54,6 @@ class StockAdapter(private val context: Context, private val stocks: List<Stock>
         val symbolTextView: TextView = view.findViewById(R.id.stockSymbolTextView)
         val quantityTextView: TextView = view.findViewById(R.id.stockQuantityTextView)
         val priceTextView: TextView = view.findViewById(R.id.stockPriceTextView)
+        val deleteButton: Button = view.findViewById(R.id.deleteButton)
     }
 }
