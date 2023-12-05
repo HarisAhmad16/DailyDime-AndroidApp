@@ -1,5 +1,11 @@
 # DailyDime362Proj
 
+## Website Link:
+https://tanjodhhayer.github.io/DailyDime-Website/
+
+## Final Presentation Link:
+https://youtu.be/_OOQNo5S2f8
+
 ## Show and Tell 2 Video Link:
 https://www.loom.com/share/bd8ade041b7248c1bdb39da5ec943ee8?sid=93014a8d-be36-4dfa-a2f2-5cc62143b440
 
