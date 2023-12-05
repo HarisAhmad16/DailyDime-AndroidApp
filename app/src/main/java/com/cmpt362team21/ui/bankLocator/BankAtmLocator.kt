@@ -42,9 +42,12 @@ class BankAtmLocator : AppCompatActivity(), OnMapReadyCallback, LocationListener
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_bank_atm_locator)
+
+
         val mapFragment = supportFragmentManager.findFragmentById(R.id.map)
                 as SupportMapFragment
         mapFragment.getMapAsync(this)
+        //checkPermission()
 
         if(!Places.isInitialized()){
             Places.initialize(this,"AIzaSyBGIwb4c3NXUNz87rrrVPPaf3IJXDnYXBk")
